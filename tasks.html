@@ -105,12 +105,9 @@
               <p class="text-xs text-slate-400">Manage and prioritize your to-do list</p>
             </div>
           </div>
-          <div class="flex items-center space-x-3">
-            <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center md:hidden">
-              <i class="fa-solid fa-moon text-slate-600 dark:hidden text-sm"></i><i class="fa-solid fa-sun text-yellow-400 hidden dark:block text-sm"></i>
-            </button>
-            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-bold">A</div>
-          </div>
+          <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center md:hidden">
+            <i class="fa-solid fa-moon text-slate-600 dark:hidden text-sm"></i><i class="fa-solid fa-sun text-yellow-400 hidden dark:block text-sm"></i>
+          </button>
         </div>
       </header>
 
@@ -378,7 +375,6 @@
     }
 
     function deleteTask(id) {
-      if (!confirm('Delete this task?')) return;
       Store.deleteTask(id);
       renderTasks();
       toast('Task deleted');

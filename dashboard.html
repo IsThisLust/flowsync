@@ -121,7 +121,6 @@
             <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center md:hidden">
               <i class="fa-solid fa-moon text-slate-600 dark:hidden text-sm"></i><i class="fa-solid fa-sun text-yellow-400 hidden dark:block text-sm"></i>
             </button>
-            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-bold">A</div>
           </div>
         </div>
       </header>
@@ -185,23 +184,38 @@
           </div>
 
         <!-- ─── STREAK + DAILY GOAL ─── -->
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 flex items-center space-x-4">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl shadow-lg shadow-orange-500/20">🔥</div>
-            <div>
-              <p class="text-2xl font-extrabold text-slate-900 dark:text-white" id="streakCount">0</p>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Day Focus Streak</p>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Streak Card -->
+          <div class="stat-card bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Focus Streak</p>
+              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20"><span class="text-sm">🔥</span></div>
             </div>
+            <p class="text-3xl font-extrabold text-slate-900 dark:text-white counter" id="streakCount">0</p>
+            <p class="text-xs text-slate-400 mt-1">consecutive days</p>
           </div>
-          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
-            <div class="flex items-center justify-between mb-2">
-              <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Daily Focus Goal</p>
-              <p class="text-xs font-bold text-brand-600 dark:text-brand-400"><span id="goalCurrent">0</span> / 240 min</p>
+          <!-- Daily Goal Card (spans 2 cols on lg) -->
+          <div class="stat-card lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Daily Focus Goal</p>
+              <div class="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center"><i class="fa-solid fa-bullseye text-brand-500 text-sm"></i></div>
             </div>
-            <div class="h-3 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+            <div class="flex items-end justify-between mb-2">
+              <p class="text-3xl font-extrabold text-slate-900 dark:text-white counter"><span id="goalCurrent">0</span><span class="text-base text-slate-400 ml-1">/ 240 min</span></p>
+            </div>
+            <div class="h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
               <div class="h-full rounded-full bg-gradient-to-r from-brand-500 to-accent-500 transition-all duration-1000" id="goalBar" style="width:0%"></div>
             </div>
             <p class="text-[11px] text-slate-400 mt-2" id="goalMsg">Start a focus session to make progress!</p>
+          </div>
+          <!-- Best Day Card -->
+          <div class="stat-card bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Best Day</p>
+              <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center"><i class="fa-solid fa-trophy text-emerald-500 text-sm"></i></div>
+            </div>
+            <p class="text-3xl font-extrabold text-slate-900 dark:text-white counter" id="bestDayLabel">—</p>
+            <p class="text-xs text-slate-400 mt-1" id="bestDaySub">this week</p>
           </div>
         </div>
         </div>
@@ -309,7 +323,8 @@
       document.getElementById('statDist').textContent          = s.distractions;
 
       // Streak
-      document.getElementById('streakCount').textContent = Store.getStreak() + ' day' + (Store.getStreak() !== 1 ? 's' : '');
+      const streak = Store.getStreak();
+      document.getElementById('streakCount').textContent = streak;
 
       // Daily goal (target: 240 min = 4 hrs)
       const goalPct = Math.min((s.focusMinutes / 240) * 100, 100);
@@ -320,6 +335,14 @@
       else if (goalPct >= 60) gMsg.textContent = '💪 Great progress — keep it up!';
       else if (goalPct > 0)  gMsg.textContent = '🚀 On your way — ' + Math.round(240 - s.focusMinutes) + ' min to go!';
       else                   gMsg.textContent = 'Start a focus session to make progress!';
+
+      // Best day this week
+      const weekly = Store.getWeeklyStats();
+      const best = [...weekly].sort((a, b) => b.focusMinutes - a.focusMinutes)[0];
+      if (best && best.focusMinutes > 0) {
+        document.getElementById('bestDayLabel').textContent = best.day;
+        document.getElementById('bestDaySub').textContent = best.focusMinutes + ' min focus';
+      }
 
       // Balance donut
       const circ = 351.86;
