@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports — FlowSync</title>
+  <meta name="description" content="FlowSync weekly productivity reports with AI-generated insights." />
+  <meta name="theme-color" content="#4f46e5" />
+  <link rel="manifest" href="manifest.json" />
+
+  <script>if(localStorage.getItem('fs-theme')==='dark')document.documentElement.classList.add('dark');</script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand:  { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+            accent: { 400:'#2dd4bf',500:'#14b8a6',600:'#0d9488' },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',system-ui,sans-serif}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}.dark ::-webkit-scrollbar-thumb{background:#334155}
+    .nav-link{display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.75rem;font-size:0.875rem;font-weight:500;color:#64748b;transition:all 0.2s}
+    .nav-link:hover{background:#f8fafc;color:#334155}.dark .nav-link:hover{background:#1e293b;color:#e2e8f0}
+    .nav-link.active{background:#eef2ff;color:#4f46e5;font-weight:600}.dark .nav-link.active{background:rgba(79,70,229,0.1);color:#818cf8}
+    .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:35;opacity:0;pointer-events:none;transition:opacity 0.3s}
+    .sidebar-overlay.active{opacity:1;pointer-events:all}
+    .bottom-nav{padding-bottom:env(safe-area-inset-bottom,0)}
+    .stat-card{transition:transform 0.2s,box-shadow 0.2s}.stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.08)}
+    .insight-card{border-left:3px solid}
+
+    @media print {
+      aside, nav, header, .no-print { display:none !important; }
+      main { margin-left:0 !important; padding-bottom:0 !important; }
+      body { background:white !important; color:black !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+  <div class="flex min-h-screen">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-40 transition-transform duration-300 -translate-x-full md:translate-x-0 flex flex-col">
+      <div class="flex items-center space-x-2 p-5 border-b border-slate-100 dark:border-slate-800">
+        <a href="index.html" class="flex items-center space-x-2">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg"><i class="fa-solid fa-bolt text-white text-sm"></i></div>
+          <span class="text-xl font-bold bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">FlowSync</span>
+        </a>
+      </div>
+      <nav class="flex-1 p-3 space-y-1">
+        <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-line w-5 text-center"></i><span>Dashboard</span></a>
+        <a href="tasks.html"     class="nav-link"><i class="fa-solid fa-list-check w-5 text-center"></i><span>Tasks</span></a>
+        <a href="pomodoro.html"  class="nav-link"><i class="fa-solid fa-stopwatch w-5 text-center"></i><span>Focus Timer</span></a>
+        <a href="report.html"    class="nav-link active"><i class="fa-solid fa-chart-pie w-5 text-center"></i><span>Reports</span></a>
+      </nav>
+      <div class="p-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
+        <button onclick="toggleTheme()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          <i class="fa-solid fa-moon dark:hidden w-5 text-center"></i><i class="fa-solid fa-sun hidden dark:block w-5 text-center text-yellow-400"></i>
+          <span class="dark:hidden">Dark Mode</span><span class="hidden dark:block">Light Mode</span>
+        </button>
+        <a href="index.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          <i class="fa-solid fa-arrow-left w-5 text-center"></i><span>Back to Home</span>
+        </a>
+      </div>
+    </aside>
+
+    <div id="sidebarOverlay" class="sidebar-overlay md:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main class="flex-1 md:ml-64 pb-20 md:pb-0">
+      <!-- Top Bar -->
+      <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-950/80 backdrop-blur-lg border-b border-slate-200/60 dark:border-slate-800/60 no-print">
+        <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center space-x-4">
+            <button onclick="toggleSidebar()" class="md:hidden w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-bars text-slate-600 dark:text-slate-300"></i></button>
+            <div>
+              <h1 class="text-lg font-bold text-slate-800 dark:text-white">Weekly Report</h1>
+              <p class="text-xs text-slate-400">AI-generated productivity insights</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button onclick="window.print()" class="hidden sm:inline-flex items-center space-x-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+              <i class="fa-solid fa-print text-xs"></i><span>Print</span>
+            </button>
+            <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center md:hidden">
+              <i class="fa-solid fa-moon text-slate-600 dark:hidden text-sm"></i><i class="fa-solid fa-sun text-yellow-400 hidden dark:block text-sm"></i>
+            </button>
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-bold">A</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ═══ REPORT CONTENT ═══ -->
+      <div class="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+
+        <!-- Report Header -->
+        <div class="bg-gradient-to-r from-brand-600 to-brand-700 rounded-2xl p-6 sm:p-8 text-white">
+          <div class="flex items-center space-x-3 mb-2">
+            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"><i class="fa-solid fa-chart-pie text-lg"></i></div>
+            <div>
+              <h2 class="text-xl font-extrabold">Your Weekly Report</h2>
+              <p class="text-sm text-brand-200" id="reportDateRange"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── Summary Stats ─── -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="stat-card bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 text-center">
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Total Tasks Done</p>
+            <p class="text-3xl font-extrabold text-brand-600 dark:text-brand-400" id="rTasks">0</p>
+          </div>
+          <div class="stat-card bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 text-center">
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Focus Hours</p>
+            <p class="text-3xl font-extrabold text-accent-600 dark:text-accent-400" id="rFocus">0</p>
+          </div>
+          <div class="stat-card bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 text-center">
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Avg. Productivity</p>
+            <p class="text-3xl font-extrabold text-violet-600 dark:text-violet-400"><span id="rProd">0</span>%</p>
+          </div>
+          <div class="stat-card bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 text-center">
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Focus Sessions</p>
+            <p class="text-3xl font-extrabold text-rose-600 dark:text-rose-400" id="rSessions">0</p>
+          </div>
+        </div>
+
+        <!-- ─── Charts Row ─── -->
+        <div class="grid lg:grid-cols-2 gap-6">
+          <!-- Focus Time by Day -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+            <h3 class="font-bold text-slate-800 dark:text-white text-sm mb-4">Focus Time by Day</h3>
+            <div style="height:220px"><canvas id="focusChart"></canvas></div>
+          </div>
+          <!-- Tasks Completed by Day -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+            <h3 class="font-bold text-slate-800 dark:text-white text-sm mb-4">Tasks Completed by Day</h3>
+            <div style="height:220px"><canvas id="tasksChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- ─── Productivity Score Trend ─── -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+          <h3 class="font-bold text-slate-800 dark:text-white text-sm mb-4">Productivity Score Trend</h3>
+          <div style="height:200px"><canvas id="trendChart"></canvas></div>
+        </div>
+
+        <!-- ─── Task Breakdown (Doughnut) ─── -->
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 flex flex-col items-center">
+            <h3 class="font-bold text-slate-800 dark:text-white text-sm mb-4 self-start">Task Priority Breakdown</h3>
+            <div style="width:220px;height:220px"><canvas id="priorityChart"></canvas></div>
+          </div>
+
+          <!-- Work-Life Balance Trend -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+            <h3 class="font-bold text-slate-800 dark:text-white text-sm mb-4">Work-Life Balance</h3>
+            <div class="flex items-center justify-center mb-4">
+              <div class="relative">
+                <svg width="160" height="160" viewBox="0 0 160 160" class="transform -rotate-90">
+                  <circle cx="80" cy="80" r="64" fill="none" stroke-width="12" class="stroke-slate-200 dark:stroke-slate-800" />
+                  <circle id="wlbRing" cx="80" cy="80" r="64" fill="none" stroke="url(#wlbG)" stroke-width="12" stroke-linecap="round"
+                    stroke-dasharray="402.12" stroke-dashoffset="402.12" style="transition:stroke-dashoffset 1.5s ease" />
+                  <defs><linearGradient id="wlbG" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#4f46e5"/><stop offset="100%" stop-color="#14b8a6"/></linearGradient></defs>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span class="text-4xl font-extrabold text-slate-800 dark:text-white" id="wlbScore">0</span>
+                  <span class="text-xs text-slate-400">/100</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-center text-sm font-semibold" id="wlbLabel"></p>
+            <p class="text-center text-xs text-slate-400 mt-1" id="wlbAdvice"></p>
+          </div>
+        </div>
+
+        <!-- ─── AI INSIGHTS ─── -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+          <div class="flex items-center space-x-2 mb-5">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center"><i class="fa-solid fa-brain text-white text-xs"></i></div>
+            <h3 class="font-bold text-slate-800 dark:text-white text-sm">AI Insights & Recommendations</h3>
+          </div>
+          <div class="space-y-4" id="insightsContainer">
+            <p class="text-sm text-slate-400">Generating insights…</p>
+          </div>
+        </div>
+
+        <!-- ─── Daily Breakdown Table ─── -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 overflow-x-auto">
+          <h3 class="font-bold text-slate-800 dark:text-white text-sm mb-4">Daily Breakdown</h3>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-100 dark:border-slate-800">
+                <th class="text-left py-3 px-2 text-xs font-semibold text-slate-500 uppercase">Day</th>
+                <th class="text-center py-3 px-2 text-xs font-semibold text-slate-500 uppercase">Focus (min)</th>
+                <th class="text-center py-3 px-2 text-xs font-semibold text-slate-500 uppercase">Tasks</th>
+                <th class="text-center py-3 px-2 text-xs font-semibold text-slate-500 uppercase">Sessions</th>
+                <th class="text-center py-3 px-2 text-xs font-semibold text-slate-500 uppercase">Score</th>
+              </tr>
+            </thead>
+            <tbody id="dailyTable"></tbody>
+          </table>
+        </div>
+
+      </div><!-- /content -->
+    </main>
+
+    <!-- ═══ MOBILE BOTTOM NAV ═══ -->
+    <nav class="fixed bottom-0 left-0 right-0 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-40 bottom-nav no-print">
+      <div class="grid grid-cols-4 h-16">
+        <a href="dashboard.html" class="flex flex-col items-center justify-center text-slate-400 text-xs"><i class="fa-solid fa-chart-line text-lg mb-1"></i>Dashboard</a>
+        <a href="tasks.html"     class="flex flex-col items-center justify-center text-slate-400 text-xs"><i class="fa-solid fa-list-check text-lg mb-1"></i>Tasks</a>
+        <a href="pomodoro.html"  class="flex flex-col items-center justify-center text-slate-400 text-xs"><i class="fa-solid fa-stopwatch text-lg mb-1"></i>Focus</a>
+        <a href="report.html"    class="flex flex-col items-center justify-center text-brand-600 dark:text-brand-400 text-xs font-semibold"><i class="fa-solid fa-chart-pie text-lg mb-1"></i>Reports</a>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ═══ JAVASCRIPT ═══ -->
+  <script src="js/store.js"></script>
+  <script>
+    /* ─── Helpers ─── */
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('-translate-x-full');document.getElementById('sidebarOverlay').classList.toggle('active')}
+    function toggleTheme(){document.documentElement.classList.toggle('dark');Store.setTheme(document.documentElement.classList.contains('dark')?'dark':'light');renderAllCharts()}
+
+    /* ═══ REPORT DATA ═══ */
+    const weekly = Store.getWeeklyStats();
+    const isDark = () => document.documentElement.classList.contains('dark');
+
+    // Date range label
+    const first = new Date(weekly[0].date);
+    const last  = new Date(weekly[6].date);
+    document.getElementById('reportDateRange').textContent =
+      first.toLocaleDateString('en-IN',{day:'numeric',month:'short'}) + ' — ' +
+      last.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+
+    // Summary stats
+    const totalTasks    = weekly.reduce((s,d) => s + d.tasksCompleted, 0);
+    const totalFocusMin = weekly.reduce((s,d) => s + d.focusMinutes, 0);
+    const totalSessions = weekly.reduce((s,d) => s + d.sessions, 0);
+    const avgProd       = Math.round(weekly.reduce((s,d) => s + d.productivityScore, 0) / 7);
+
+    document.getElementById('rTasks').textContent    = totalTasks;
+    document.getElementById('rFocus').textContent    = (totalFocusMin / 60).toFixed(1) + 'h';
+    document.getElementById('rProd').textContent     = avgProd;
+    document.getElementById('rSessions').textContent = totalSessions;
+
+    // Work-life balance
+    const todayStats = Store.getTodayStats();
+    const wlb = todayStats.balanceScore;
+    const wlbCirc = 2 * Math.PI * 64;
+    setTimeout(() => {
+      document.getElementById('wlbRing').setAttribute('stroke-dashoffset', wlbCirc * (1 - wlb / 100));
+    }, 300);
+    document.getElementById('wlbScore').textContent = wlb;
+    const wlbLbl = document.getElementById('wlbLabel');
+    const wlbAdv = document.getElementById('wlbAdvice');
+    if (wlb >= 80) {
+      wlbLbl.innerHTML = '<span class="text-emerald-500">🟢 Healthy Balance</span>';
+      wlbAdv.textContent = 'Great job! You\'re maintaining a sustainable work rhythm.';
+    } else if (wlb >= 50) {
+      wlbLbl.innerHTML = '<span class="text-amber-500">🟡 Needs Attention</span>';
+      wlbAdv.textContent = 'Consider taking more breaks and setting a hard stop time.';
+    } else {
+      wlbLbl.innerHTML = '<span class="text-red-500">🔴 Burnout Risk</span>';
+      wlbAdv.textContent = 'You\'re overworking. Block personal time on your calendar today.';
+    }
+
+    /* ═══ CHARTS ═══ */
+    function chartColors() {
+      return {
+        text: isDark() ? '#64748b' : '#94a3b8',
+        grid: isDark() ? '#1e293b' : '#f1f5f9',
+      };
+    }
+
+    let charts = {};
+
+    function renderAllCharts() {
+      Object.values(charts).forEach(c => c.destroy());
+      charts = {};
+      const cc = chartColors();
+
+      // Focus Time Bar Chart
+      charts.focus = new Chart(document.getElementById('focusChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: weekly.map(d => d.day),
+          datasets: [{
+            label: 'Focus (min)',
+            data: weekly.map(d => d.focusMinutes),
+            backgroundColor: weekly.map(d => d.isToday ? 'rgba(20,184,166,0.8)' : 'rgba(99,102,241,0.6)'),
+            borderRadius: 8,
+            borderSkipped: false,
+            maxBarThickness: 36,
+          }],
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{
+            y:{beginAtZero:true,grid:{color:cc.grid},ticks:{color:cc.text,font:{size:11}}},
+            x:{grid:{display:false},ticks:{color:cc.text,font:{size:11}}},
+          },
+        },
+      });
+
+      // Tasks Completed Bar Chart
+      charts.tasks = new Chart(document.getElementById('tasksChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: weekly.map(d => d.day),
+          datasets: [{
+            label: 'Tasks',
+            data: weekly.map(d => d.tasksCompleted),
+            backgroundColor: 'rgba(139,92,246,0.6)',
+            borderRadius: 8,
+            borderSkipped: false,
+            maxBarThickness: 36,
+          }],
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{
+            y:{beginAtZero:true,grid:{color:cc.grid},ticks:{color:cc.text,font:{size:11},stepSize:1}},
+            x:{grid:{display:false},ticks:{color:cc.text,font:{size:11}}},
+          },
+        },
+      });
+
+      // Productivity Score Line Chart
+      charts.trend = new Chart(document.getElementById('trendChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: weekly.map(d => d.day),
+          datasets: [{
+            label: 'Productivity Score',
+            data: weekly.map(d => d.productivityScore),
+            borderColor: '#4f46e5',
+            backgroundColor: 'rgba(79,70,229,0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 5,
+            pointBackgroundColor: weekly.map(d => d.isToday ? '#14b8a6' : '#4f46e5'),
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointHoverRadius: 7,
+          }],
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{
+            y:{min:0,max:100,grid:{color:cc.grid},ticks:{color:cc.text,font:{size:11},callback:v=>v+'%'}},
+            x:{grid:{display:false},ticks:{color:cc.text,font:{size:11}}},
+          },
+        },
+      });
+
+      // Priority Doughnut
+      const allTasks = Store.getTasks();
+      const high   = allTasks.filter(t => t.priority === 'high').length;
+      const medium = allTasks.filter(t => t.priority === 'medium').length;
+      const low    = allTasks.filter(t => t.priority === 'low').length;
+
+      charts.priority = new Chart(document.getElementById('priorityChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['High', 'Medium', 'Low'],
+          datasets: [{
+            data: [high, medium, low],
+            backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+            borderWidth: 0,
+            spacing: 4,
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          cutout: '65%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: cc.text, font: { size: 12 }, padding: 16 },
+            },
+          },
+        },
+      });
+    }
+
+    renderAllCharts();
+
+    /* ═══ DAILY TABLE ═══ */
+    document.getElementById('dailyTable').innerHTML = weekly.map(d => `
+      <tr class="border-b border-slate-50 dark:border-slate-800/50 ${d.isToday ? 'bg-brand-50/50 dark:bg-brand-950/20' : ''}">
+        <td class="py-3 px-2 font-medium text-slate-700 dark:text-slate-200">${d.dayFull} ${d.isToday ? '<span class="text-xs text-brand-500 font-bold">(Today)</span>' : ''}</td>
+        <td class="py-3 px-2 text-center text-slate-600 dark:text-slate-300">${d.focusMinutes}</td>
+        <td class="py-3 px-2 text-center text-slate-600 dark:text-slate-300">${d.tasksCompleted}</td>
+        <td class="py-3 px-2 text-center text-slate-600 dark:text-slate-300">${d.sessions}</td>
+        <td class="py-3 px-2 text-center">
+          <span class="inline-flex items-center justify-center w-10 h-6 rounded-full text-xs font-bold
+            ${d.productivityScore >= 70 ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400' :
+              d.productivityScore >= 40 ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400' :
+              'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'}">${d.productivityScore}</span>
+        </td>
+      </tr>
+    `).join('');
+
+    /* ═══ AI INSIGHTS (Rule-based) ═══ */
+    function generateInsights() {
+      const insights = [];
+      const days = weekly;
+
+      // Best day
+      const bestDay = [...days].sort((a,b) => b.productivityScore - a.productivityScore)[0];
+      if (bestDay.productivityScore > 0) {
+        insights.push({
+          icon: '🏆', color: 'border-emerald-400', title: 'Peak Performance Day',
+          text: `Your most productive day was <strong>${bestDay.dayFull}</strong> with a score of ${bestDay.productivityScore}% and ${bestDay.focusMinutes} minutes of focus time. Try to replicate this day's conditions!`
+        });
+      }
+
+      // Focus consistency
+      const focusDays = days.filter(d => d.focusMinutes > 0).length;
+      if (focusDays >= 5) {
+        insights.push({
+          icon: '🔥', color: 'border-brand-400', title: 'Consistent Focus Streak',
+          text: `You logged focus sessions on <strong>${focusDays} out of 7 days</strong> — excellent consistency! Maintaining daily focus routines is the #1 predictor of long-term productivity.`
+        });
+      } else if (focusDays <= 2) {
+        insights.push({
+          icon: '⚡', color: 'border-amber-400', title: 'Focus Gap Detected',
+          text: `You only had focus sessions on <strong>${focusDays} days</strong> this week. Consider starting each morning with one 25-minute Pomodoro to build the habit.`
+        });
+      }
+
+      // Avg focus per session
+      const avgFocus = totalSessions > 0 ? Math.round(totalFocusMin / totalSessions) : 0;
+      if (avgFocus > 0) {
+        insights.push({
+          icon: '⏱️', color: 'border-violet-400', title: 'Session Quality',
+          text: `Average focus session: <strong>${avgFocus} minutes</strong>. ${avgFocus >= 25 ? 'You\'re completing full Pomodoro cycles — well done!' : 'Consider aiming for full 25-minute sessions to maximize deep work.'}`
+        });
+      }
+
+      // Task completion rate
+      const totalAllTasks = Store.getTasks().length;
+      const completedTasks = Store.getTasks().filter(t => t.completed).length;
+      const completionRate = totalAllTasks > 0 ? Math.round((completedTasks / totalAllTasks) * 100) : 0;
+      insights.push({
+        icon: '✅', color: 'border-teal-400', title: 'Task Completion Rate',
+        text: `You've completed <strong>${completedTasks} of ${totalAllTasks} total tasks</strong> (${completionRate}%). ${completionRate >= 70 ? 'Outstanding execution!' : 'Tip: Break large tasks into smaller sub-tasks to boost completion rates.'}`
+      });
+
+      // Weekend work check
+      const weekendWork = days.filter(d => ['Sat','Sun'].includes(d.day) && d.focusMinutes > 30);
+      if (weekendWork.length > 0) {
+        insights.push({
+          icon: '🧘', color: 'border-rose-400', title: 'Weekend Work Alert',
+          text: `You worked on <strong>${weekendWork.length} weekend day(s)</strong> this week. While occasional weekend work is fine, consistent weekend sessions correlate with burnout. Protect your recovery time.`
+        });
+      }
+
+      // Render
+      const container = document.getElementById('insightsContainer');
+      if (insights.length === 0) {
+        container.innerHTML = '<p class="text-sm text-slate-400">Not enough data yet. Use FlowSync for a full week to unlock AI insights!</p>';
+        return;
+      }
+      container.innerHTML = insights.map(i => `
+        <div class="insight-card ${i.color} bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 pl-5">
+          <div class="flex items-start space-x-3">
+            <span class="text-xl flex-shrink-0">${i.icon}</span>
+            <div>
+              <p class="text-sm font-bold text-slate-800 dark:text-white mb-1">${i.title}</p>
+              <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${i.text}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    generateInsights();
+  </script>
+</body>
+</html>

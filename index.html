@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlowSync — AI-Powered Time Management for Indian Professionals</title>
+  <meta name="description" content="FlowSync uses AI to help Indian professionals save 2-3 hours daily with smart task prioritization, focus timers, and personalized productivity insights. Try it free." />
+  <meta name="keywords" content="AI productivity, time management, Indian professionals, task prioritization, focus timer, work-life balance" />
+  <meta name="author" content="FlowSync" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+              950: '#1e1b4b',
+            },
+            accent: {
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
+            },
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'float-delay': 'float 6s ease-in-out 2s infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'slide-up': 'slideUp 0.6s ease-out forwards',
+            'slide-in-left': 'slideInLeft 0.6s ease-out forwards',
+            'slide-in-right': 'slideInRight 0.6s ease-out forwards',
+            'fade-in': 'fadeIn 0.8s ease-out forwards',
+            'count-up': 'countUp 2s ease-out forwards',
+            'gradient': 'gradient 8s ease infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(40px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            slideInLeft: {
+              '0%': { opacity: '0', transform: 'translateX(-40px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' },
+            },
+            slideInRight: {
+              '0%': { opacity: '0', transform: 'translateX(40px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            gradient: {
+              '0%, 100%': { backgroundPosition: '0% 50%' },
+              '50%': { backgroundPosition: '100% 50%' },
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Custom Styles -->
+  <style>
+    /* ===== Base Styles ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+
+    /* ===== Animated Gradient Background ===== */
+    .gradient-bg {
+      background: linear-gradient(-45deg, #1e1b4b, #312e81, #4338ca, #4f46e5);
+      background-size: 400% 400%;
+      animation: gradient 8s ease infinite;
+    }
+    @keyframes gradient {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* ===== Glassmorphism Card ===== */
+    .glass {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .dark .glass-light {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    /* ===== Glow Effect ===== */
+    .glow {
+      box-shadow: 0 0 40px rgba(99, 102, 241, 0.15),
+                  0 0 80px rgba(99, 102, 241, 0.08);
+    }
+    .glow-accent {
+      box-shadow: 0 0 30px rgba(20, 184, 166, 0.2);
+    }
+
+    /* ===== Scroll Animation Observer ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal-left.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal-right.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ===== Custom Scrollbar ===== */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1e1b4b; }
+    ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+    /* ===== Pricing Card Hover ===== */
+    .pricing-card {
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .pricing-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
+    }
+
+    /* ===== Feature Card Hover ===== */
+    .feature-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    /* ===== Step Connector Line ===== */
+    .step-line {
+      position: absolute;
+      top: 32px;
+      left: 50%;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, #4f46e5, #14b8a6);
+      z-index: 0;
+    }
+
+    /* ===== Donut Chart (CSS-only) ===== */
+    .donut {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== Stat Counter ===== */
+    .stat-number { font-variant-numeric: tabular-nums; }
+
+    /* ===== Mobile Menu ===== */
+    .mobile-menu { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .mobile-menu.open { max-height: 400px; }
+
+    /* ===== Testimonial Card ===== */
+    .testimonial-card { transition: transform 0.3s ease; }
+    .testimonial-card:hover { transform: scale(1.03); }
+
+    /* ===== CTA Shimmer ===== */
+    .shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    .shimmer::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    /* ===== Progress Bar Animation ===== */
+    .progress-fill {
+      transition: width 1.5s ease-in-out;
+    }
+
+    /* ===== Navbar Scroll Shadow ===== */
+    .nav-scrolled {
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    /* ===== Light mode overrides ===== */
+    .light-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    /* ===== Weekly Chart Bars ===== */
+    .chart-bar {
+      transition: height 1s ease-in-out;
+    }
+
+    /* ===== Pomodoro ring ===== */
+    .timer-ring {
+      transition: stroke-dashoffset 1s ease;
+    }
+  </style>
+</head>
+
+<!-- ============================================== -->
+<!--  BODY: Default is light mode                   -->
+<!-- ============================================== -->
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-500">
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav id="navbar" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white/80 dark:bg-slate-950/80 backdrop-blur-lg border-b border-slate-200/60 dark:border-slate-800/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 md:h-18">
+
+        <!-- Logo -->
+        <a href="#hero" class="flex items-center space-x-2 group">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg group-hover:shadow-brand-500/40 transition-shadow duration-300">
+            <i class="fa-solid fa-bolt text-white text-sm"></i>
+          </div>
+          <span class="text-xl font-bold bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">FlowSync</span>
+        </a>
+
+        <!-- Desktop Menu -->
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="#features" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Features</a>
+          <a href="#how-it-works" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">How It Works</a>
+          <a href="#dashboard" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Dashboard</a>
+          <a href="#pricing" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Pricing</a>
+
+          <!-- Theme Toggle -->
+          <button id="themeToggle" class="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" aria-label="Toggle theme">
+            <i class="fa-solid fa-moon text-slate-600 dark:hidden"></i>
+            <i class="fa-solid fa-sun text-yellow-400 hidden dark:inline"></i>
+          </button>
+
+          <a href="dashboard.html" class="shimmer px-5 py-2.5 text-sm font-semibold text-white rounded-full bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all duration-300">
+            Go to App
+          </a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <div class="flex items-center space-x-3 md:hidden">
+          <button id="themeToggleMobile" class="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800" aria-label="Toggle theme">
+            <i class="fa-solid fa-moon text-slate-600 dark:hidden text-sm"></i>
+            <i class="fa-solid fa-sun text-yellow-400 hidden dark:inline text-sm"></i>
+          </button>
+          <button id="mobileMenuBtn" class="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800" aria-label="Open menu">
+            <i class="fa-solid fa-bars text-slate-600 dark:text-slate-300"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Dropdown -->
+      <div id="mobileMenu" class="mobile-menu md:hidden pb-4">
+        <div class="flex flex-col space-y-3 pt-2">
+          <a href="#features" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" onclick="closeMobileMenu()">Features</a>
+          <a href="#how-it-works" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" onclick="closeMobileMenu()">How It Works</a>
+          <a href="#dashboard" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" onclick="closeMobileMenu()">Dashboard</a>
+          <a href="#pricing" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" onclick="closeMobileMenu()">Pricing</a>
+          <a href="dashboard.html" onclick="closeMobileMenu();" class="text-sm font-semibold text-white rounded-full bg-gradient-to-r from-brand-600 to-brand-500 px-5 py-2.5 text-center block">
+            Go to App
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+
+  <!-- ============================================== -->
+  <!--  SECTION 1: HERO                               -->
+  <!-- ============================================== -->
+  <section id="hero" class="relative min-h-screen flex items-center overflow-hidden pt-16">
+
+    <!-- Background Decoration -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-brand-500/10 dark:bg-brand-500/5 blur-3xl animate-pulse-slow"></div>
+      <div class="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-accent-500/10 dark:bg-accent-500/5 blur-3xl animate-pulse-slow" style="animation-delay: 2s;"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-brand-400/5 dark:bg-brand-400/3 blur-3xl"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+      <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+        <!-- Left: Copy -->
+        <div class="text-center lg:text-left space-y-8">
+          <!-- Badge -->
+          <div class="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-brand-50 dark:bg-brand-950/50 border border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-300 text-sm font-medium">
+            <span class="w-2 h-2 rounded-full bg-accent-500 animate-pulse"></span>
+            <span>AI-Powered Productivity for India</span>
+          </div>
+
+          <!-- Headline -->
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight tracking-tight">
+            <span class="text-slate-900 dark:text-white">Stop Losing </span>
+            <span class="bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 bg-clip-text text-transparent">3 Hours</span>
+            <span class="text-slate-900 dark:text-white"> Every&nbsp;Day</span>
+          </h1>
+
+          <!-- Subheadline -->
+          <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+            FlowSync uses AI to prioritize your tasks, build your ideal schedule, and protect your focus — so you can do meaningful work and still have a life.
+          </p>
+
+          <!-- CTA Buttons -->
+          <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+            <a href="dashboard.html" id="hero-cta" class="shimmer inline-block w-full sm:w-auto px-8 py-4 text-base font-bold text-white rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 shadow-xl shadow-brand-500/25 hover:shadow-brand-500/40 transition-all duration-300 hover:-translate-y-0.5 text-center">
+              <i class="fa-solid fa-rocket mr-2"></i>Start Free — No Credit Card
+            </a>
+            <a href="#how-it-works" class="w-full sm:w-auto px-8 py-4 text-base font-semibold rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-brand-400 hover:text-brand-600 dark:hover:text-brand-400 transition-all duration-300 text-center">
+              <i class="fa-solid fa-play mr-2"></i>See How It Works
+            </a>
+          </div>
+
+          <!-- Social Proof -->
+          <div class="flex items-center gap-6 justify-center lg:justify-start pt-4">
+            <div class="flex -space-x-3">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 border-2 border-white dark:border-slate-900 flex items-center justify-center text-white text-xs font-bold">A</div>
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 border-2 border-white dark:border-slate-900 flex items-center justify-center text-white text-xs font-bold">R</div>
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 border-2 border-white dark:border-slate-900 flex items-center justify-center text-white text-xs font-bold">P</div>
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-white dark:border-slate-900 flex items-center justify-center text-white text-xs font-bold">S</div>
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 border-2 border-white dark:border-slate-900 flex items-center justify-center text-white text-xs font-bold">+</div>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">500+ Professionals</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">on the early-access waitlist</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Hero Visual (Dashboard Card Preview) -->
+        <div class="relative animate-float">
+          <!-- Main Dashboard Card -->
+          <div class="relative bg-white dark:bg-slate-900 rounded-3xl shadow-2xl shadow-brand-500/10 dark:shadow-brand-500/5 border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
+            <!-- Dashboard Header -->
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Good morning, Priya 👋</p>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Today's Focus Plan</h3>
+              </div>
+              <div class="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>AI Optimized</span>
+              </div>
+            </div>
+            <!-- Metric Cards Row -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div class="bg-gradient-to-br from-brand-50 to-brand-100/50 dark:from-brand-950/40 dark:to-brand-900/20 rounded-2xl p-4 border border-brand-100 dark:border-brand-800/30">
+                <div class="flex items-center space-x-2 mb-1">
+                  <i class="fa-solid fa-check-circle text-brand-500 text-sm"></i>
+                  <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Tasks Done</span>
+                </div>
+                <p class="text-2xl font-extrabold text-brand-700 dark:text-brand-300 stat-number">12<span class="text-sm font-medium text-slate-400">/15</span></p>
+              </div>
+              <div class="bg-gradient-to-br from-accent-50 to-accent-100/50 dark:from-accent-600/10 dark:to-accent-500/5 rounded-2xl p-4 border border-accent-100 dark:border-accent-600/20">
+                <div class="flex items-center space-x-2 mb-1">
+                  <i class="fa-solid fa-fire text-accent-500 text-sm"></i>
+                  <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Focus Time</span>
+                </div>
+                <p class="text-2xl font-extrabold text-accent-600 dark:text-accent-400 stat-number">4.5<span class="text-sm font-medium text-slate-400"> hrs</span></p>
+              </div>
+              <div class="bg-gradient-to-br from-violet-50 to-violet-100/50 dark:from-violet-950/30 dark:to-violet-900/10 rounded-2xl p-4 border border-violet-100 dark:border-violet-800/30">
+                <div class="flex items-center space-x-2 mb-1">
+                  <i class="fa-solid fa-chart-line text-violet-500 text-sm"></i>
+                  <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Productivity</span>
+                </div>
+                <p class="text-2xl font-extrabold text-violet-700 dark:text-violet-300 stat-number">87<span class="text-sm font-medium text-slate-400">%</span></p>
+              </div>
+              <div class="bg-gradient-to-br from-rose-50 to-rose-100/50 dark:from-rose-950/30 dark:to-rose-900/10 rounded-2xl p-4 border border-rose-100 dark:border-rose-800/30">
+                <div class="flex items-center space-x-2 mb-1">
+                  <i class="fa-solid fa-shield-halved text-rose-500 text-sm"></i>
+                  <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Distractions</span>
+                </div>
+                <p class="text-2xl font-extrabold text-rose-600 dark:text-rose-400 stat-number">3<span class="text-sm font-medium text-slate-400"> blocked</span></p>
+              </div>
+            </div>
+            <!-- Mini Task List -->
+            <div class="space-y-3">
+              <div class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center"><i class="fa-solid fa-flag text-red-500 text-xs"></i></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">Q3 Strategy Deck — Final Review</p>
+                  <p class="text-xs text-slate-400">Urgent · Due 2:00 PM</p>
+                </div>
+                <span class="text-xs font-medium px-2 py-1 rounded-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400">P1</span>
+              </div>
+              <div class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                <div class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center"><i class="fa-solid fa-video text-amber-500 text-xs"></i></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">Design Sprint with Product Team</p>
+                  <p class="text-xs text-slate-400">3:30 PM · Google Meet</p>
+                </div>
+                <span class="text-xs font-medium px-2 py-1 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400">P2</span>
+              </div>
+              <div class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 opacity-60">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center"><i class="fa-solid fa-check text-emerald-500 text-xs"></i></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 line-through truncate">Weekly Report — Auto-generated</p>
+                  <p class="text-xs text-slate-400">Completed · 11:15 AM</p>
+                </div>
+                <span class="text-xs font-medium px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">✓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating Badge -->
+          <div class="absolute -top-4 -right-4 sm:-right-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-3 sm:p-4 border border-slate-100 dark:border-slate-700 animate-float-delay">
+            <div class="flex items-center space-x-2">
+              <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                <i class="fa-solid fa-arrow-up text-emerald-500 text-xs"></i>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400">+23%</p>
+                <p class="text-[10px] text-slate-400">This Week</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce">
+      <span class="text-xs text-slate-400 dark:text-slate-500 mb-2">Scroll</span>
+      <i class="fa-solid fa-chevron-down text-slate-400 dark:text-slate-500 text-sm"></i>
+    </div>
+  </section>
+
+
+  <!-- ============================================== -->
+  <!--  SECTION 2: PROBLEM                             -->
+  <!-- ============================================== -->
+  <section id="problem" class="py-20 md:py-28 bg-white dark:bg-slate-900 relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-500 via-accent-500 to-brand-500"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16 reveal">
+        <p class="text-sm font-bold tracking-widest text-brand-500 uppercase mb-4">The Productivity Crisis</p>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mb-6">
+          Indian Professionals Lose <span class="bg-gradient-to-r from-red-500 to-rose-500 bg-clip-text text-transparent">2–3 Hours</span> Every Day
+        </h2>
+        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Scattered priorities, back-to-back meetings, constant notifications — your best hours vanish before you even start deep work.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Problem Card 1 -->
+        <div class="reveal feature-card bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-8 border border-slate-100 dark:border-slate-700/50 text-center" style="transition-delay: 0.1s;">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+            <i class="fa-solid fa-list-check text-red-500 text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-3">Task Overload</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+            67% of professionals say they can't distinguish urgent from important. Without clear priorities, everything feels equally pressing — and nothing gets done well.
+          </p>
+        </div>
+        <!-- Problem Card 2 -->
+        <div class="reveal feature-card bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-8 border border-slate-100 dark:border-slate-700/50 text-center" style="transition-delay: 0.2s;">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+            <i class="fa-solid fa-bell text-amber-500 text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-3">Constant Distractions</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+            The average knowledge worker gets interrupted every 11 minutes. Recovering deep focus takes 23 minutes — that's hours of lost cognitive energy every single day.
+          </p>
+        </div>
+        <!-- Problem Card 3 -->
+        <div class="reveal feature-card bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-8 border border-slate-100 dark:border-slate-700/50 text-center" style="transition-delay: 0.3s;">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center">
+            <i class="fa-solid fa-battery-quarter text-violet-500 text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-3">Burnout & Imbalance</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+            Without boundaries, work bleeds into evenings and weekends. 78% of Indian employees report work-life imbalance, leading to chronic stress and declining performance.
+          </p>
+        </div>
+      </div>
+
+      <!-- Impact Stat -->
+      <div class="reveal mt-16 text-center">
+        <div class="inline-flex items-center space-x-4 bg-gradient-to-r from-brand-50 to-accent-50 dark:from-brand-950/30 dark:to-accent-950/30 rounded-2xl px-8 py-5 border border-brand-100 dark:border-brand-800/40">
+          <i class="fa-solid fa-calculator text-brand-500 text-xl"></i>
+          <p class="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300">
+            That's <span class="text-brand-600 dark:text-brand-400 font-extrabold">₹45,000+ per employee</span> lost every month in wasted productive hours.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================== -->
+  <!--  SECTION 3: AI FEATURES                         -->
+  <!-- ============================================== -->
+  <section id="features" class="py-20 md:py-28 bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16 reveal">
+        <p class="text-sm font-bold tracking-widest text-accent-500 uppercase mb-4">AI-Powered Features</p>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mb-6">
+          Your Personal AI <span class="bg-gradient-to-r from-brand-500 to-accent-500 bg-clip-text text-transparent">Productivity Co-pilot</span>
+        </h2>
+        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          FlowSync doesn't just organize your to-do list — it learns your work patterns, protects your peak hours, and coaches you toward sustainable high performance.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+
+        <!-- Feature 1: AI Task Prioritization -->
+        <div class="reveal feature-card bg-white dark:bg-slate-900/80 rounded-2xl p-7 border border-slate-100 dark:border-slate-800 group">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-brand-500/20">
+            <i class="fa-solid fa-brain text-white text-xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">AI Task Prioritization</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Combines the Eisenhower Matrix with your personal work history to auto-rank tasks. No more guessing what to tackle first — FlowSync knows your patterns.
+          </p>
+        </div>
+
+        <!-- Feature 2: Smart Schedule Generator -->
+        <div class="reveal feature-card bg-white dark:bg-slate-900/80 rounded-2xl p-7 border border-slate-100 dark:border-slate-800 group" style="transition-delay: 0.1s;">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-accent-500/20">
+            <i class="fa-solid fa-calendar-check text-white text-xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Smart Daily Schedule</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            AI builds your ideal day — blocking focus time during your peak hours, batching meetings, and leaving room for breaks. Syncs seamlessly with Google Calendar.
+          </p>
+        </div>
+
+        <!-- Feature 3: Pomodoro Focus Timer -->
+        <div class="reveal feature-card bg-white dark:bg-slate-900/80 rounded-2xl p-7 border border-slate-100 dark:border-slate-800 group" style="transition-delay: 0.2s;">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-rose-500/20">
+            <i class="fa-solid fa-stopwatch text-white text-xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Focus Timer & DND Mode</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Pomodoro-based focus sessions with adaptive intervals. Automatically enables DND and tracks distractions so you can protect your deep-work windows.
+          </p>
+        </div>
+
+        <!-- Feature 4: Work-Life Balance Score -->
+        <div class="reveal feature-card bg-white dark:bg-slate-900/80 rounded-2xl p-7 border border-slate-100 dark:border-slate-800 group" style="transition-delay: 0.1s;">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid fa-heart-pulse text-white text-xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Work-Life Balance Score</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            A real-time score (0–100) that tracks overtime, break frequency, and evening screen time. Get nudges before burnout hits — because productivity without health is unsustainable.
+          </p>
+        </div>
+
+        <!-- Feature 5: Weekly Insights -->
+        <div class="reveal feature-card bg-white dark:bg-slate-900/80 rounded-2xl p-7 border border-slate-100 dark:border-slate-800 group" style="transition-delay: 0.2s;">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-amber-500/20">
+            <i class="fa-solid fa-chart-pie text-white text-xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Weekly AI Reports</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Every Sunday, get a personalized performance report with trend analysis, habit insights, and actionable recommendations — written in plain language, not raw stats.
+          </p>
+        </div>
+
+        <!-- Feature 6: India-specific Context -->
+        <div class="reveal feature-card bg-white dark:bg-slate-900/80 rounded-2xl p-7 border border-slate-100 dark:border-slate-800 group" style="transition-delay: 0.3s;">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/20">
+            <i class="fa-solid fa-indian-rupee-sign text-white text-xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Built for India</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Festival-aware scheduling, IST timezone intelligence, UPI-ready payments, and work patterns calibrated for Indian corporate culture. Not another Silicon Valley clone.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================== -->
+  <!--  SECTION 4: HOW IT WORKS                        -->
+  <!-- ============================================== -->
+  <section id="how-it-works" class="py-20 md:py-28 bg-white dark:bg-slate-900 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16 reveal">
+        <p class="text-sm font-bold tracking-widest text-brand-500 uppercase mb-4">Simple as 1-2-3</p>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mb-6">
+          Get Focused in <span class="bg-gradient-to-r from-brand-500 to-accent-500 bg-clip-text text-transparent">Under 2 Minutes</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8 lg:gap-12 relative">
+        <!-- Connector lines (visible on md+) -->
+        <div class="hidden md:block absolute top-16 left-[calc(16.67%+2rem)] right-[calc(16.67%+2rem)] h-0.5 bg-gradient-to-r from-brand-400 via-accent-400 to-brand-400 opacity-30"></div>
+
+        <!-- Step 1 -->
+        <div class="reveal text-center relative" style="transition-delay: 0.1s;">
+          <div class="relative z-10 w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-xl shadow-brand-500/25">
+            <span class="text-2xl font-extrabold text-white">1</span>
+          </div>
+          <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-3">Connect & Import</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-xs mx-auto">
+            Sign up with Google. FlowSync pulls your existing calendar, pending tasks, and deadlines in one click. Zero manual setup.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="reveal text-center relative" style="transition-delay: 0.2s;">
+          <div class="relative z-10 w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center shadow-xl shadow-accent-500/25">
+            <span class="text-2xl font-extrabold text-white">2</span>
+          </div>
+          <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-3">AI Plans Your Day</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-xs mx-auto">
+            Our AI engine analyzes your priorities, energy patterns, and meetings — then generates an optimized daily schedule with built-in focus blocks.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="reveal text-center relative" style="transition-delay: 0.3s;">
+          <div class="relative z-10 w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-xl shadow-violet-500/25">
+            <span class="text-2xl font-extrabold text-white">3</span>
+          </div>
+          <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-3">Execute & Improve</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-xs mx-auto">
+            Start working with focus timers. FlowSync learns from every session — refining schedules, suggesting habit changes, and boosting your score weekly.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================== -->
+  <!--  SECTION 5: DASHBOARD PREVIEW                   -->
+  <!-- ============================================== -->
+  <section id="dashboard" class="py-20 md:py-28 bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
+    <!-- Background glow -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-brand-500/5 dark:bg-brand-500/3 blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div class="text-center mb-16 reveal">
+        <p class="text-sm font-bold tracking-widest text-accent-500 uppercase mb-4">Productivity Dashboard</p>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mb-6">
+          Your Performance, <span class="bg-gradient-to-r from-brand-500 to-accent-500 bg-clip-text text-transparent">At a Glance</span>
+        </h2>
+        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Real-time insights into your productivity, focus patterns, and well-being — all on one beautiful dashboard.
+        </p>
+      </div>
+
+      <!-- Dashboard Mockup -->
+      <div class="reveal max-w-5xl mx-auto bg-white dark:bg-slate-900 rounded-3xl shadow-2xl shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <!-- Topbar -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center space-x-4">
+            <div class="flex space-x-2">
+              <span class="w-3 h-3 rounded-full bg-red-400"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+            </div>
+            <span class="text-xs text-slate-400 font-medium">FlowSync Dashboard — Friday, 18 Apr 2026</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 font-medium">● Live</span>
+          </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="p-6 sm:p-8">
+          <!-- Top Stats Row -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-gradient-to-br from-brand-50 to-white dark:from-brand-950/20 dark:to-slate-900 rounded-2xl p-5 border border-brand-100 dark:border-brand-800/30">
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tasks Completed</p>
+              <div class="flex items-end space-x-2">
+                <span class="text-3xl font-extrabold text-brand-600 dark:text-brand-400 stat-number" data-target="47">0</span>
+                <span class="text-xs text-emerald-500 font-semibold pb-1">+12%</span>
+              </div>
+              <div class="mt-3 h-2 rounded-full bg-brand-100 dark:bg-brand-900/30 overflow-hidden">
+                <div class="progress-fill h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-400" style="width: 0%" data-width="78%"></div>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-accent-50 to-white dark:from-accent-950/20 dark:to-slate-900 rounded-2xl p-5 border border-accent-100 dark:border-accent-800/30">
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Focus Hours</p>
+              <div class="flex items-end space-x-2">
+                <span class="text-3xl font-extrabold text-accent-600 dark:text-accent-400 stat-number" data-target="26">0</span>
+                <span class="text-xs text-emerald-500 font-semibold pb-1">+8%</span>
+              </div>
+              <div class="mt-3 h-2 rounded-full bg-accent-100 dark:bg-accent-900/30 overflow-hidden">
+                <div class="progress-fill h-full rounded-full bg-gradient-to-r from-accent-500 to-accent-400" style="width: 0%" data-width="65%"></div>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-violet-50 to-white dark:from-violet-950/20 dark:to-slate-900 rounded-2xl p-5 border border-violet-100 dark:border-violet-800/30">
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Productivity Score</p>
+              <div class="flex items-end space-x-2">
+                <span class="text-3xl font-extrabold text-violet-600 dark:text-violet-400 stat-number" data-target="87">0</span>
+                <span class="text-base font-bold text-violet-400 pb-0.5">%</span>
+              </div>
+              <div class="mt-3 h-2 rounded-full bg-violet-100 dark:bg-violet-900/30 overflow-hidden">
+                <div class="progress-fill h-full rounded-full bg-gradient-to-r from-violet-500 to-violet-400" style="width: 0%" data-width="87%"></div>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-rose-50 to-white dark:from-rose-950/20 dark:to-slate-900 rounded-2xl p-5 border border-rose-100 dark:border-rose-800/30">
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Distractions Blocked</p>
+              <div class="flex items-end space-x-2">
+                <span class="text-3xl font-extrabold text-rose-600 dark:text-rose-400 stat-number" data-target="9">0</span>
+                <span class="text-xs text-rose-500 font-semibold pb-1">↓ 34%</span>
+              </div>
+              <div class="mt-3 h-2 rounded-full bg-rose-100 dark:bg-rose-900/30 overflow-hidden">
+                <div class="progress-fill h-full rounded-full bg-gradient-to-r from-rose-500 to-rose-400" style="width: 0%" data-width="22%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Weekly Productivity Chart -->
+            <div class="lg:col-span-2 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-700/50">
+              <div class="flex items-center justify-between mb-6">
+                <h4 class="font-bold text-slate-800 dark:text-white text-sm">Weekly Productivity Trend</h4>
+                <span class="text-xs px-3 py-1 rounded-full bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 font-medium">This Week</span>
+              </div>
+              <!-- SVG Bar Chart -->
+              <div class="flex items-end justify-between h-40 px-2">
+                <div class="flex flex-col items-center space-y-2 flex-1">
+                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-gradient-to-t from-brand-500 to-brand-400" style="height: 60%"></div>
+                  <span class="text-xs text-slate-400">Mon</span>
+                </div>
+                <div class="flex flex-col items-center space-y-2 flex-1">
+                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-gradient-to-t from-brand-500 to-brand-400" style="height: 75%"></div>
+                  <span class="text-xs text-slate-400">Tue</span>
+                </div>
+                <div class="flex flex-col items-center space-y-2 flex-1">
+                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-gradient-to-t from-brand-500 to-brand-400" style="height: 45%"></div>
+                  <span class="text-xs text-slate-400">Wed</span>
+                </div>
+                <div class="flex flex-col items-center space-y-2 flex-1">
+                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-gradient-to-t from-brand-500 to-brand-400" style="height: 90%"></div>
+                  <span class="text-xs text-slate-400">Thu</span>
+                </div>
+                <div class="flex flex-col items-center space-y-2 flex-1">
+                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-gradient-to-t from-accent-500 to-accent-400 shadow-lg shadow-accent-500/20" style="height: 85%"></div>
+                  <span class="text-xs font-semibold text-accent-500">Fri</span>
+                </div>
+                <div class="flex flex-col items-center space-y-2 flex-1">
+                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-slate-200 dark:bg-slate-700" style="height: 30%"></div>
+                  <span class="text-xs text-slate-400">Sat</span>
+                </div>
+                <div class="flex flex-col items-center space-y-2 flex-1">
+                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-slate-200 dark:bg-slate-700" style="height: 15%"></div>
+                  <span class="text-xs text-slate-400">Sun</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Work-Life Balance Donut -->
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-700/50 flex flex-col items-center justify-center">
+              <h4 class="font-bold text-slate-800 dark:text-white text-sm mb-6">Work-Life Balance</h4>
+              <!-- CSS Donut Chart -->
+              <div class="relative mb-4">
+                <svg width="140" height="140" viewBox="0 0 140 140" class="transform -rotate-90">
+                  <circle cx="70" cy="70" r="56" fill="none" stroke="currentColor" stroke-width="12" class="text-slate-200 dark:text-slate-700" />
+                  <circle cx="70" cy="70" r="56" fill="none" stroke="url(#balanceGrad)" stroke-width="12" stroke-linecap="round"
+                    stroke-dasharray="352" stroke-dashoffset="60" class="timer-ring" />
+                  <defs>
+                    <linearGradient id="balanceGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#4f46e5" />
+                      <stop offset="100%" stop-color="#14b8a6" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <span class="text-3xl font-extrabold text-slate-800 dark:text-white">83</span>
+                  <span class="text-xs text-slate-400 font-medium">/ 100</span>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Healthy Balance</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================== -->
+  <!--  SECTION 6: PRICING                             -->
+  <!-- ============================================== -->
+  <section id="pricing" class="py-20 md:py-28 bg-white dark:bg-slate-900 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16 reveal">
+        <p class="text-sm font-bold tracking-widest text-brand-500 uppercase mb-4">Simple Pricing</p>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mb-6">
+          Invest in Your <span class="bg-gradient-to-r from-brand-500 to-accent-500 bg-clip-text text-transparent">Productivity</span>
+        </h2>
+        <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          Start free forever. Upgrade when you're ready to unlock the full power of AI-driven time mastery.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
+
+        <!-- Free Plan -->
+        <div class="reveal pricing-card bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 relative">
+          <div class="mb-6">
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Starter</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Perfect for getting started</p>
+          </div>
+          <div class="mb-8">
+            <span class="text-4xl font-extrabold text-slate-900 dark:text-white">Free</span>
+            <span class="text-sm text-slate-400 ml-1">forever</span>
+          </div>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-emerald-500 mt-0.5 text-sm"></i><span class="text-sm text-slate-600 dark:text-slate-300">Up to 10 tasks/day</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-emerald-500 mt-0.5 text-sm"></i><span class="text-sm text-slate-600 dark:text-slate-300">Basic Pomodoro timer</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-emerald-500 mt-0.5 text-sm"></i><span class="text-sm text-slate-600 dark:text-slate-300">Daily productivity score</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-emerald-500 mt-0.5 text-sm"></i><span class="text-sm text-slate-600 dark:text-slate-300">Basic task prioritization</span></li>
+            <li class="flex items-start space-x-3 opacity-40"><i class="fa-solid fa-xmark text-slate-400 mt-0.5 text-sm"></i><span class="text-sm text-slate-400">AI schedule generation</span></li>
+            <li class="flex items-start space-x-3 opacity-40"><i class="fa-solid fa-xmark text-slate-400 mt-0.5 text-sm"></i><span class="text-sm text-slate-400">Weekly AI reports</span></li>
+          </ul>
+          <button onclick="showWaitlist()" class="w-full py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold hover:border-brand-400 hover:text-brand-600 dark:hover:text-brand-400 transition-all duration-300">
+            Get Started Free
+          </button>
+        </div>
+
+        <!-- Premium Plan (Popular) -->
+        <div class="reveal pricing-card bg-gradient-to-br from-brand-600 to-brand-700 dark:from-brand-600 dark:to-brand-800 rounded-3xl p-8 border border-brand-500/30 relative shadow-2xl shadow-brand-500/20 scale-[1.03]" style="transition-delay: 0.1s;">
+          <!-- Badge -->
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-accent-400 to-accent-500 text-white text-xs font-bold shadow-lg">
+            Most Popular
+          </div>
+          <div class="mb-6">
+            <h3 class="text-lg font-bold text-white mb-1">Premium</h3>
+            <p class="text-sm text-brand-200">For serious professionals</p>
+          </div>
+          <div class="mb-8">
+            <span class="text-4xl font-extrabold text-white">₹299</span>
+            <span class="text-sm text-brand-200 ml-1">/month</span>
+          </div>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-accent-400 mt-0.5 text-sm"></i><span class="text-sm text-white">Unlimited tasks</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-accent-400 mt-0.5 text-sm"></i><span class="text-sm text-white">AI task prioritization</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-accent-400 mt-0.5 text-sm"></i><span class="text-sm text-white">Smart daily schedule</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-accent-400 mt-0.5 text-sm"></i><span class="text-sm text-white">Google Calendar sync</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-accent-400 mt-0.5 text-sm"></i><span class="text-sm text-white">Weekly AI reports</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-accent-400 mt-0.5 text-sm"></i><span class="text-sm text-white">Work-life balance score</span></li>
+          </ul>
+          <button onclick="showWaitlist()" class="shimmer w-full py-3.5 rounded-2xl bg-white text-brand-700 font-bold hover:bg-brand-50 transition-all duration-300 shadow-lg">
+            Start 14-Day Free Trial
+          </button>
+        </div>
+
+        <!-- Team Plan -->
+        <div class="reveal pricing-card bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 relative" style="transition-delay: 0.2s;">
+          <div class="mb-6">
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Team</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400">For teams & managers</p>
+          </div>
+          <div class="mb-8">
+            <span class="text-4xl font-extrabold text-slate-900 dark:text-white">₹999</span>
+            <span class="text-sm text-slate-400 ml-1">/user/month</span>
+          </div>
+          <ul class="space-y-4 mb-8">
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-emerald-500 mt-0.5 text-sm"></i><span class="text-sm text-slate-600 dark:text-slate-300">Everything in Premium</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-emerald-500 mt-0.5 text-sm"></i><span class="text-sm text-slate-600 dark:text-slate-300">Team dashboard & analytics</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-emerald-500 mt-0.5 text-sm"></i><span class="text-sm text-slate-600 dark:text-slate-300">Manager insights panel</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-emerald-500 mt-0.5 text-sm"></i><span class="text-sm text-slate-600 dark:text-slate-300">Team burnout alerts</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-emerald-500 mt-0.5 text-sm"></i><span class="text-sm text-slate-600 dark:text-slate-300">Priority support</span></li>
+            <li class="flex items-start space-x-3"><i class="fa-solid fa-check text-emerald-500 mt-0.5 text-sm"></i><span class="text-sm text-slate-600 dark:text-slate-300">SSO & admin controls</span></li>
+          </ul>
+          <button onclick="showWaitlist()" class="w-full py-3.5 rounded-2xl border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold hover:border-brand-400 hover:text-brand-600 dark:hover:text-brand-400 transition-all duration-300">
+            Contact Sales
+          </button>
+        </div>
+      </div>
+
+      <!-- Money-back guarantee -->
+      <div class="reveal text-center mt-12">
+        <div class="inline-flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400">
+          <i class="fa-solid fa-shield-halved text-emerald-500"></i>
+          <span>14-day free trial · No credit card required · Cancel anytime</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================== -->
+  <!--  SECTION 7: TESTIMONIALS                        -->
+  <!-- ============================================== -->
+  <section id="testimonials" class="py-20 md:py-28 bg-slate-50 dark:bg-slate-950 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16 reveal">
+        <p class="text-sm font-bold tracking-widest text-accent-500 uppercase mb-4">Early Feedback</p>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mb-6">
+          Loved by <span class="bg-gradient-to-r from-brand-500 to-accent-500 bg-clip-text text-transparent">Indian Professionals</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
+
+        <!-- Testimonial 1 -->
+        <div class="reveal testimonial-card bg-white dark:bg-slate-900/80 rounded-2xl p-7 border border-slate-100 dark:border-slate-800 relative">
+          <div class="flex items-center space-x-1 mb-4">
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6 italic">
+            "FlowSync's AI scheduler is a game-changer. I was skeptical, but it accurately predicted my focus windows and cut my meeting-recovery time in half. I'm saving 90 minutes daily."
+          </p>
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-sm font-bold">AK</div>
+            <div>
+              <p class="text-sm font-semibold text-slate-800 dark:text-white">Ananya Krishnan</p>
+              <p class="text-xs text-slate-400">Product Manager, Razorpay</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="reveal testimonial-card bg-white dark:bg-slate-900/80 rounded-2xl p-7 border border-slate-100 dark:border-slate-800 relative" style="transition-delay: 0.1s;">
+          <div class="flex items-center space-x-1 mb-4">
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6 italic">
+            "The work-life balance score was an eye-opener. I didn't realize I was working 12-hour days until FlowSync flagged it. The burnout alerts genuinely changed my habits."
+          </p>
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white text-sm font-bold">RM</div>
+            <div>
+              <p class="text-sm font-semibold text-slate-800 dark:text-white">Rohan Mehta</p>
+              <p class="text-xs text-slate-400">Senior Developer, Infosys</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="reveal testimonial-card bg-white dark:bg-slate-900/80 rounded-2xl p-7 border border-slate-100 dark:border-slate-800 relative" style="transition-delay: 0.2s;">
+          <div class="flex items-center space-x-1 mb-4">
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            <i class="fa-solid fa-star-half-stroke text-amber-400 text-sm"></i>
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6 italic">
+            "As a freelancer managing 4 clients, FlowSync finally gave me structure. The AI prioritization handles context-switching beautifully. It understands Indian holidays too — big plus!"
+          </p>
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-sm font-bold">PS</div>
+            <div>
+              <p class="text-sm font-semibold text-slate-800 dark:text-white">Priya Sharma</p>
+              <p class="text-xs text-slate-400">Freelance UX Designer, Mumbai</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================== -->
+  <!--  SECTION 8: FINAL CTA                           -->
+  <!-- ============================================== -->
+  <section id="cta" class="py-20 md:py-28 relative overflow-hidden">
+    <!-- Gradient Background -->
+    <div class="absolute inset-0 gradient-bg"></div>
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50"></div>
+
+    <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="reveal">
+        <div class="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white/90 text-sm font-medium mb-8 backdrop-blur-sm">
+          <i class="fa-solid fa-sparkles text-accent-400"></i>
+          <span>Join 500+ Professionals on the Waitlist</span>
+        </div>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6 leading-tight">
+          Ready to Reclaim Your<br class="hidden sm:inline" /> Most Productive Hours?
+        </h2>
+        <p class="text-lg text-brand-200 max-w-xl mx-auto mb-10">
+          Stop fighting your schedule. Let AI build the perfect workday — so you can focus on work that matters and still leave on time.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="dashboard.html" class="shimmer inline-block w-full sm:w-auto px-10 py-4 text-base font-bold text-brand-700 bg-white rounded-2xl hover:bg-brand-50 shadow-2xl shadow-black/20 transition-all duration-300 hover:-translate-y-0.5 text-center">
+            <i class="fa-solid fa-rocket mr-2"></i>Start Free Today
+          </a>
+          <a href="#pricing" class="w-full sm:w-auto px-10 py-4 text-base font-semibold text-white/90 border-2 border-white/30 rounded-2xl hover:bg-white/10 transition-all duration-300 text-center">
+            View Pricing
+          </a>
+        </div>
+        <p class="text-sm text-brand-300 mt-6">No credit card needed · Setup in 60 seconds · Cancel anytime</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================== -->
+  <!--  FOOTER                                         -->
+  <!-- ============================================== -->
+  <footer class="bg-slate-900 dark:bg-black text-slate-400 py-16 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-10 mb-12">
+        <!-- Brand -->
+        <div class="md:col-span-1">
+          <a href="#hero" class="flex items-center space-x-2 mb-4">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg">
+              <i class="fa-solid fa-bolt text-white text-sm"></i>
+            </div>
+            <span class="text-xl font-bold text-white">FlowSync</span>
+          </a>
+          <p class="text-sm leading-relaxed">AI-powered time management built for the Indian professional. Work smarter, live better.</p>
+          <div class="flex space-x-4 mt-6">
+            <a href="#" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-brand-600 flex items-center justify-center transition-colors duration-300" aria-label="Twitter"><i class="fa-brands fa-x-twitter text-sm"></i></a>
+            <a href="#" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-brand-600 flex items-center justify-center transition-colors duration-300" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in text-sm"></i></a>
+            <a href="#" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-brand-600 flex items-center justify-center transition-colors duration-300" aria-label="Instagram"><i class="fa-brands fa-instagram text-sm"></i></a>
+            <a href="#" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-brand-600 flex items-center justify-center transition-colors duration-300" aria-label="YouTube"><i class="fa-brands fa-youtube text-sm"></i></a>
+          </div>
+        </div>
+
+        <!-- Product Links -->
+        <div>
+          <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Product</h4>
+          <ul class="space-y-3">
+            <li><a href="#features" class="text-sm hover:text-brand-400 transition-colors">Features</a></li>
+            <li><a href="#pricing" class="text-sm hover:text-brand-400 transition-colors">Pricing</a></li>
+            <li><a href="#dashboard" class="text-sm hover:text-brand-400 transition-colors">Dashboard</a></li>
+            <li><a href="#" class="text-sm hover:text-brand-400 transition-colors">Integrations</a></li>
+            <li><a href="#" class="text-sm hover:text-brand-400 transition-colors">Roadmap</a></li>
+          </ul>
+        </div>
+
+        <!-- Company Links -->
+        <div>
+          <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Company</h4>
+          <ul class="space-y-3">
+            <li><a href="#" class="text-sm hover:text-brand-400 transition-colors">About Us</a></li>
+            <li><a href="#" class="text-sm hover:text-brand-400 transition-colors">Blog</a></li>
+            <li><a href="#" class="text-sm hover:text-brand-400 transition-colors">Careers</a></li>
+            <li><a href="#" class="text-sm hover:text-brand-400 transition-colors">Press Kit</a></li>
+            <li><a href="#" class="text-sm hover:text-brand-400 transition-colors">Contact</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact & Legal -->
+        <div>
+          <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Get in Touch</h4>
+          <ul class="space-y-3">
+            <li class="flex items-center space-x-2">
+              <i class="fa-solid fa-envelope text-xs text-brand-400"></i>
+              <a href="mailto:hello@flowsync.in" class="text-sm hover:text-brand-400 transition-colors">hello@flowsync.in</a>
+            </li>
+            <li class="flex items-center space-x-2">
+              <i class="fa-solid fa-phone text-xs text-brand-400"></i>
+              <span class="text-sm">+91 98765 43210</span>
+            </li>
+            <li class="flex items-center space-x-2">
+              <i class="fa-solid fa-location-dot text-xs text-brand-400"></i>
+              <span class="text-sm">Bangalore, India</span>
+            </li>
+          </ul>
+          <div class="mt-6 space-y-2">
+            <a href="#" class="text-xs hover:text-brand-400 transition-colors block">Privacy Policy</a>
+            <a href="#" class="text-xs hover:text-brand-400 transition-colors block">Terms of Service</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+        <p class="text-xs text-slate-500">&copy; 2026 FlowSync. All rights reserved. Made with <i class="fa-solid fa-heart text-red-500"></i> in India.</p>
+        <div class="flex items-center space-x-4">
+          <span class="text-xs text-slate-500">Backed by</span>
+          <span class="text-xs font-bold text-slate-400">BTech Innovation & Entrepreneurship</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ============================================== -->
+  <!-- WAITLIST MODAL                                  -->
+  <!-- ============================================== -->
+  <div id="waitlistModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeWaitlist()"></div>
+    <!-- Modal -->
+    <div class="relative bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full p-8 border border-slate-200 dark:border-slate-700 transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+      <button onclick="closeWaitlist()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <div class="text-center">
+        <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-xl shadow-brand-500/25">
+          <i class="fa-solid fa-rocket text-white text-2xl"></i>
+        </div>
+        <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">Join the Waitlist</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-8">MVP launching soon — be the first to experience AI-powered productivity.</p>
+
+        <form onsubmit="submitWaitlist(event)" class="space-y-4">
+          <input type="text" id="waitlistName" placeholder="Your full name" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition" />
+          <input type="email" id="waitlistEmail" placeholder="Your work email" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition" />
+          <select id="waitlistRole" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
+            <option value="">Select your role</option>
+            <option value="corporate">Corporate Employee</option>
+            <option value="remote">Remote / Hybrid Worker</option>
+            <option value="freelancer">Freelancer</option>
+            <option value="startup">Startup Founder / Team</option>
+            <option value="manager">Manager / Lead</option>
+            <option value="student">Student</option>
+          </select>
+          <button type="submit" class="shimmer w-full py-3.5 text-sm font-bold text-white rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 shadow-lg shadow-brand-500/25 transition-all duration-300">
+            <i class="fa-solid fa-bell mr-2"></i>Notify Me on Launch
+          </button>
+        </form>
+
+        <p class="text-xs text-slate-400 mt-4">We respect your privacy. No spam, ever.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 z-[110] bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-500 pointer-events-none">
+    <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+      <i class="fa-solid fa-check text-white text-sm"></i>
+    </div>
+    <div>
+      <p class="text-sm font-bold">You're on the list! 🎉</p>
+      <p class="text-xs text-emerald-100">We'll notify you when FlowSync launches.</p>
+    </div>
+  </div>
+
+
+  <!-- ============================================== -->
+  <!--  JAVASCRIPT                                     -->
+  <!-- ============================================== -->
+  <script>
+    // ===== THEME TOGGLE =====
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeToggleMobile = document.getElementById('themeToggleMobile');
+
+    // Check saved preference or default to light
+    const savedTheme = localStorage.getItem('fs-theme');
+    if (savedTheme === 'dark') {
+      html.classList.add('dark');
+    }
+
+    function toggleTheme() {
+      html.classList.toggle('dark');
+      localStorage.setItem('fs-theme', html.classList.contains('dark') ? 'dark' : 'light');
+    }
+
+    themeToggle.addEventListener('click', toggleTheme);
+    themeToggleMobile.addEventListener('click', toggleTheme);
+
+
+    // ===== MOBILE MENU =====
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open');
+    });
+
+    function closeMobileMenu() {
+      mobileMenu.classList.remove('open');
+    }
+
+
+    // ===== NAVBAR SCROLL EFFECT =====
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 20) {
+        navbar.classList.add('nav-scrolled');
+      } else {
+        navbar.classList.remove('nav-scrolled');
+      }
+    });
+
+
+    // ===== SCROLL REVEAL ANIMATIONS =====
+    const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, {
+      threshold: 0.15,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    revealElements.forEach(el => revealObserver.observe(el));
+
+
+    // ===== ANIMATED STAT COUNTERS =====
+    const statNumbers = document.querySelectorAll('[data-target]');
+
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const target = parseInt(entry.target.getAttribute('data-target'));
+          animateCounter(entry.target, target);
+          counterObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    statNumbers.forEach(el => counterObserver.observe(el));
+
+    function animateCounter(element, target) {
+      let current = 0;
+      const increment = target / 40;
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          element.textContent = target;
+          clearInterval(timer);
+        } else {
+          element.textContent = Math.floor(current);
+        }
+      }, 40);
+    }
+
+
+    // ===== ANIMATED PROGRESS BARS =====
+    const progressBars = document.querySelectorAll('[data-width]');
+
+    const progressObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const width = entry.target.getAttribute('data-width');
+          setTimeout(() => {
+            entry.target.style.width = width;
+          }, 300);
+          progressObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    progressBars.forEach(el => progressObserver.observe(el));
+
+
+    // ===== WAITLIST MODAL =====
+    function showWaitlist() {
+      const modal = document.getElementById('waitlistModal');
+      const content = document.getElementById('modalContent');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        content.style.transform = 'scale(1)';
+        content.style.opacity = '1';
+      }, 10);
+    }
+
+    function closeWaitlist() {
+      const modal = document.getElementById('waitlistModal');
+      const content = document.getElementById('modalContent');
+      content.style.transform = 'scale(0.95)';
+      content.style.opacity = '0';
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    function submitWaitlist(e) {
+      e.preventDefault();
+      const name = document.getElementById('waitlistName').value;
+      closeWaitlist();
+      showToast();
+      // Reset form
+      document.getElementById('waitlistName').value = '';
+      document.getElementById('waitlistEmail').value = '';
+      document.getElementById('waitlistRole').value = '';
+    }
+
+    function showToast() {
+      const toast = document.getElementById('toast');
+      toast.style.transform = 'translateY(0)';
+      toast.style.opacity = '1';
+      toast.classList.remove('pointer-events-none');
+      setTimeout(() => {
+        toast.style.transform = 'translateY(20px)';
+        toast.style.opacity = '0';
+        toast.classList.add('pointer-events-none');
+      }, 4000);
+    }
+
+    // Close modal on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeWaitlist();
+    });
+
+
+    // ===== SMOOTH SCROLL FOR ANCHOR LINKS =====
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
