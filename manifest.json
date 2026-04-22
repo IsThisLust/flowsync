@@ -2,7 +2,7 @@
   "name": "FlowSync — AI Productivity",
   "short_name": "FlowSync",
   "description": "AI-powered time management for Indian professionals. Smart task prioritization, Pomodoro focus timer, and productivity insights.",
-  "start_url": "./dashboard.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#4f46e5",

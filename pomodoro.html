@@ -82,6 +82,7 @@
         <a href="tasks.html"     class="nav-link"><i class="fa-solid fa-list-check w-5 text-center"></i><span>Tasks</span></a>
         <a href="pomodoro.html"  class="nav-link active"><i class="fa-solid fa-stopwatch w-5 text-center"></i><span>Focus Timer</span></a>
         <a href="report.html"    class="nav-link"><i class="fa-solid fa-chart-pie w-5 text-center"></i><span>Reports</span></a>
+        <a href="ipr.html"       class="nav-link"><i class="fa-solid fa-shield-halved w-5 text-center"></i><span>IPR & Legal</span></a>
       </nav>
       <div class="p-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
         <button onclick="toggleTheme()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
@@ -170,9 +171,7 @@
             <!-- Task Selector -->
             <div class="w-full max-w-md">
               <label class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">Working on:</label>
-              <select id="taskSelect" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
-                <option value="">— No specific task —</option>
-              </select>
+              <input type="text" id="taskDescription" placeholder="What are you working on? (e.g., 'Write report', 'Code review')" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition" />
             </div>
 
             <!-- Keyboard hint -->
@@ -454,7 +453,17 @@
         timer.interval = null;
         timer.running = false;
       }
-      onSessionComplete();
+      // Manually skip to next mode without alarm/notif
+      if (timer.mode === 'focus') {
+        timer.sessionsCompleted++;
+        toast('Focused jumped to break ⏭️');
+        if (timer.sessionsCompleted % 4 === 0) setMode('longBreak');
+        else setMode('break');
+      } else {
+        toast('Break skipped ⏭️');
+        setMode('focus');
+      }
+      saveTimerState();
     }
 
     /* ─── Session Complete ─── */
@@ -467,11 +476,11 @@
 
       if (timer.mode === 'focus') {
         // Save focus session
-        const taskId = document.getElementById('taskSelect').value || null;
+        const desc = document.getElementById('taskDescription').value.trim() || null;
         Store.addSession({
-          type:     'focus',
-          duration: MODES.focus.duration / 60,
-          taskId:   taskId,
+          type:        'focus',
+          duration:    MODES.focus.duration / 60,
+          description: desc,
         });
         timer.sessionsCompleted++;
         toast('🎉 Focus session complete!');
@@ -484,7 +493,12 @@
           setMode('break');
         }
       } else {
-        // Break complete → back to focus
+        // Break complete — save break session too
+        const breakType = timer.mode === 'longBreak' ? 'longBreak' : 'break';
+        Store.addSession({
+          type:     breakType,
+          duration: MODES[timer.mode].duration / 60,
+        });
         toast('💪 Break over — let\'s focus!');
         setMode('focus');
       }
@@ -572,7 +586,7 @@
 
     function renderRecentSessions() {
       const today    = new Date().toISOString().split('T')[0];
-      const sessions = Store.getSessions().filter(s => s.endTime && s.endTime.startsWith(today) && s.type === 'focus').reverse().slice(0, 5);
+      const sessions = Store.getSessions().filter(s => s.endTime && s.endTime.startsWith(today)).reverse().slice(0, 5);
       const el = document.getElementById('recentSessions');
       if (sessions.length === 0) {
         el.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">No sessions yet today</p>';
@@ -580,8 +594,10 @@
       }
       el.innerHTML = sessions.map(s => {
         const time = new Date(s.endTime).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+        const icon = s.type === 'focus' ? 'fa-check-circle text-emerald-500' : 'fa-mug-hot text-amber-500';
+        const label = s.type === 'focus' ? '🎯 Focus' : (s.type === 'longBreak' ? '🍵 Long break' : '☕ Break');
         return `<div class="flex items-center justify-between py-1.5 border-b border-slate-50 dark:border-slate-800 last:border-0">
-          <div class="flex items-center space-x-2"><i class="fa-solid fa-check-circle text-emerald-500 text-xs"></i><span class="text-xs text-slate-600 dark:text-slate-300">${s.duration} min focus</span></div>
+          <div class="flex items-center space-x-2"><i class="fa-solid ${icon} text-xs"></i><span class="text-xs text-slate-600 dark:text-slate-300">${label} · ${s.duration} min</span></div>
           <span class="text-xs text-slate-400">${time}</span>
         </div>`;
       }).join('');
@@ -594,31 +610,25 @@
       toast('Distraction logged');
     }
 
-    /* ─── Populate Task Selector ─── */
-    function populateTasks() {
-      const sel = document.getElementById('taskSelect');
-      const tasks = Store.getTasks().filter(t => !t.completed);
-      tasks.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t.id;
-        opt.textContent = t.title;
-        sel.appendChild(opt);
-      });
-    }
-
     /* ─── Keyboard Shortcut ─── */
     document.addEventListener('keydown', e => {
-      if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'TEXTAREA') {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.code === 'Space') {
         e.preventDefault();
         toggleTimer();
       }
+      const key = e.key.toLowerCase();
+      if (key === 'd') window.location.href = 'dashboard.html';
+      if (key === 't') window.location.href = 'tasks.html';
+      if (key === 'r') window.location.href = 'report.html';
+      if (key === 'i') window.location.href = 'ipr.html';
+      if (key === '?') alert('⌨️ Keyboard Shortcuts\n\nSpace = Start/Pause Timer\nD = Dashboard\nT = Tasks\nR = Reports\nI = IPR & Legal');
     });
 
     /* ─── Init ─── */
     const restored = restoreTimerState();
     if (!restored) updateDisplay();
     updateSideStats();
-    populateTasks();
   </script>
 </body>
 </html>

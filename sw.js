@@ -4,7 +4,7 @@
  * Keeps it simple — cache-first for assets, network-first for pages.
  */
 
-const CACHE_NAME = 'flowsync-v1';
+const CACHE_NAME = 'flowsync-v2';
 const SHELL_ASSETS = [
   './',
   './dashboard.html',
@@ -51,13 +51,22 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
           return res;
         })
-        .catch(() => caches.match(event.request))
+        .catch(() => caches.match(event.request).then(cached => cached || caches.match('./index.html')))
     );
     return;
   }
 
-  // Everything else — cache first
+  // Everything else — Stale-While-Revalidate
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
+    caches.match(event.request).then(cached => {
+      const networked = fetch(event.request)
+        .then(res => {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return res;
+        })
+        .catch(() => cached);
+      return cached || networked;
+    })
   );
 });

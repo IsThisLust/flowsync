@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPR & Legal — FlowSync</title>
+  <meta name="description" content="FlowSync intellectual property rights, legal information, and IP strategy overview." />
+  <meta name="theme-color" content="#4f46e5" />
+  <link rel="manifest" href="manifest.json" />
+
+  <script>if(localStorage.getItem('fs-theme')==='dark')document.documentElement.classList.add('dark');</script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand:  { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+            accent: { 400:'#2dd4bf',500:'#14b8a6',600:'#0d9488' },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',system-ui,sans-serif}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}.dark ::-webkit-scrollbar-thumb{background:#334155}
+    .nav-link{display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.75rem;font-size:0.875rem;font-weight:500;color:#64748b;transition:all 0.2s}
+    .nav-link:hover{background:#f8fafc;color:#334155}.dark .nav-link:hover{background:#1e293b;color:#e2e8f0}
+    .nav-link.active{background:#eef2ff;color:#4f46e5;font-weight:600}.dark .nav-link.active{background:rgba(79,70,229,0.1);color:#818cf8}
+    .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:35;opacity:0;pointer-events:none;transition:opacity 0.3s}
+    .sidebar-overlay.active{opacity:1;pointer-events:all}
+    .bottom-nav{padding-bottom:env(safe-area-inset-bottom,0)}
+
+    /* IP card hover */
+    .ip-card{transition:transform 0.2s,box-shadow 0.2s}
+    .ip-card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.08)}
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+  <div class="flex min-h-screen">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-40 transition-transform duration-300 -translate-x-full md:translate-x-0 flex flex-col">
+      <div class="flex items-center space-x-2 p-5 border-b border-slate-100 dark:border-slate-800">
+        <a href="index.html" class="flex items-center space-x-2">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg"><i class="fa-solid fa-bolt text-white text-sm"></i></div>
+          <span class="text-xl font-bold bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">FlowSync</span>
+        </a>
+      </div>
+      <nav class="flex-1 p-3 space-y-1">
+        <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-line w-5 text-center"></i><span>Dashboard</span></a>
+        <a href="tasks.html"     class="nav-link"><i class="fa-solid fa-list-check w-5 text-center"></i><span>Tasks</span></a>
+        <a href="pomodoro.html"  class="nav-link"><i class="fa-solid fa-stopwatch w-5 text-center"></i><span>Focus Timer</span></a>
+        <a href="report.html"    class="nav-link"><i class="fa-solid fa-chart-pie w-5 text-center"></i><span>Reports</span></a>
+        <a href="ipr.html"       class="nav-link active"><i class="fa-solid fa-shield-halved w-5 text-center"></i><span>IPR & Legal</span></a>
+      </nav>
+      <div class="p-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
+        <button onclick="toggleTheme()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          <i class="fa-solid fa-moon dark:hidden w-5 text-center"></i><i class="fa-solid fa-sun hidden dark:block w-5 text-center text-yellow-400"></i>
+          <span class="dark:hidden">Dark Mode</span><span class="hidden dark:block">Light Mode</span>
+        </button>
+        <a href="index.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+          <i class="fa-solid fa-arrow-left w-5 text-center"></i><span>Back to Home</span>
+        </a>
+      </div>
+    </aside>
+
+    <div id="sidebarOverlay" class="sidebar-overlay md:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <main class="flex-1 md:ml-64 pb-20 md:pb-0">
+      <!-- Top Bar -->
+      <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-950/80 backdrop-blur-lg border-b border-slate-200/60 dark:border-slate-800/60">
+        <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center space-x-4">
+            <button onclick="toggleSidebar()" class="md:hidden w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-bars text-slate-600 dark:text-slate-300"></i></button>
+            <div>
+              <h1 class="text-lg font-bold text-slate-800 dark:text-white">IPR & Legal</h1>
+              <p class="text-xs text-slate-400">Intellectual Property Rights & Legal Information</p>
+            </div>
+          </div>
+          <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center md:hidden">
+            <i class="fa-solid fa-moon text-slate-600 dark:hidden text-sm"></i><i class="fa-solid fa-sun text-yellow-400 hidden dark:block text-sm"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- ═══ IPR CONTENT ═══ -->
+      <div class="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-8">
+
+        <!-- Hero Banner -->
+        <div class="bg-gradient-to-br from-brand-600 via-brand-500 to-accent-500 rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-64 h-64 opacity-10">
+            <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="80" fill="none" stroke="white" stroke-width="2"/><circle cx="100" cy="100" r="60" fill="none" stroke="white" stroke-width="1.5"/><circle cx="100" cy="100" r="40" fill="none" stroke="white" stroke-width="1"/></svg>
+          </div>
+          <div class="relative z-10">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <i class="fa-solid fa-shield-halved text-xl"></i>
+              </div>
+              <hgroup>
+                <h2 class="text-2xl font-extrabold">FlowSync IP Strategy</h2>
+                <p class="text-sm text-white/70">Protecting Innovation in Productivity Technology</p>
+              </hgroup>
+            </div>
+            <p class="text-sm leading-relaxed text-white/80 max-w-2xl">
+              FlowSync's intellectual property strategy encompasses trade secrets, copyrights, design patents, and trademarks — providing multi-layered protection for our proprietary AI-driven productivity platform.
+            </p>
+          </div>
+        </div>
+
+        <!-- IP Protection Cards -->
+        <div class="grid sm:grid-cols-2 gap-5">
+
+          <!-- Trade Secret -->
+          <div class="ip-card bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center">
+                <i class="fa-solid fa-lock text-amber-500"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm">Trade Secret</h3>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 font-semibold">Active</span>
+              </div>
+            </div>
+            <h4 class="font-semibold text-slate-700 dark:text-slate-200 text-sm mb-2">AI Prioritization Algorithm</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
+              FlowSync's proprietary AI-powered task prioritization engine uses a multi-factor scoring algorithm combining deadline urgency weighting, priority classification, task-age momentum, and quick-win optimization. The specific heuristics, thresholds, and scoring weightings constitute a trade secret.
+            </p>
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700/50">
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-info-circle text-brand-500 mr-1"></i>
+                <strong>Protection measures:</strong> Algorithm details are obfuscated in production builds. Access limited to core engineering team. Covered by employee NDA agreements.
+              </p>
+            </div>
+          </div>
+
+          <!-- Copyright -->
+          <div class="ip-card bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center">
+                <i class="fa-solid fa-copyright text-brand-500"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm">Copyright</h3>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-semibold">Registered</span>
+              </div>
+            </div>
+            <h4 class="font-semibold text-slate-700 dark:text-slate-200 text-sm mb-2">UI/UX Design & Source Code</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
+              All original creative works in FlowSync are automatically protected under copyright law, including the user interface designs, visual layouts, dashboard components, icon arrangements, color systems, and the underlying JavaScript/HTML/CSS source code.
+            </p>
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700/50">
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-info-circle text-brand-500 mr-1"></i>
+                <strong>Scope:</strong> Dashboard layout, task management UI, Pomodoro timer interface, stat cards design, chart visualizations, and all custom CSS/JS code.
+              </p>
+            </div>
+          </div>
+
+          <!-- Design Patent -->
+          <div class="ip-card bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-950/40 flex items-center justify-center">
+                <i class="fa-solid fa-palette text-violet-500"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm">Design Patent</h3>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 font-semibold">Planned</span>
+              </div>
+            </div>
+            <h4 class="font-semibold text-slate-700 dark:text-slate-200 text-sm mb-2">Ornamental UI Design</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
+              We plan to file design patents protecting FlowSync's distinctive visual elements — the unique dashboard card layout, the circular work-life balance indicator, the gradient-styled navigation system, and the AI-scored task presentation format.
+            </p>
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700/50">
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-clock text-violet-500 mr-1"></i>
+                <strong>Timeline:</strong> Patent application drafting scheduled for Q3 2026. Covers ornamental (non-functional) visual design elements unique to FlowSync.
+              </p>
+            </div>
+          </div>
+
+          <!-- Trademark -->
+          <div class="ip-card bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 flex items-center justify-center">
+                <i class="fa-solid fa-trademark text-rose-500"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm">Trademark</h3>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 font-semibold">Planned</span>
+              </div>
+            </div>
+            <h4 class="font-semibold text-slate-700 dark:text-slate-200 text-sm mb-2">Brand Identity</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
+              The "FlowSync" name, bolt logo mark, and the gradient color scheme (indigo-to-teal) constitute our brand identity. Trademark registration is planned to protect these assets in the productivity software category.
+            </p>
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700/50">
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-clock text-rose-500 mr-1"></i>
+                <strong>Filing Plan:</strong> Word mark "FlowSync" + combined mark (logo + name) in Class 42 (SaaS / software services) and Class 9 (computer software). Filing expected Q2 2026.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- IP Strategy Summary -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+          <div class="flex items-center space-x-2 mb-5">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center">
+              <i class="fa-solid fa-diagram-project text-white text-xs"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 dark:text-white text-sm">IP Strategy Roadmap</h3>
+          </div>
+
+          <div class="relative">
+            <!-- Timeline -->
+            <div class="absolute left-[17px] top-2 bottom-2 w-0.5 bg-slate-200 dark:bg-slate-700"></div>
+
+            <div class="space-y-6">
+              <!-- Q1 -->
+              <div class="flex items-start space-x-4">
+                <div class="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0 z-10 border-2 border-white dark:border-slate-900">
+                  <i class="fa-solid fa-check text-emerald-500 text-xs"></i>
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-slate-800 dark:text-white">Q1 2026 — Foundation <span class="text-xs font-normal text-emerald-500 ml-1">✓ Complete</span></p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Trade secret protections established for AI algorithm. NDA framework implemented for contributors. Copyright notices added to all source files.</p>
+                </div>
+              </div>
+              <!-- Q2 -->
+              <div class="flex items-start space-x-4">
+                <div class="w-9 h-9 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center flex-shrink-0 z-10 border-2 border-white dark:border-slate-900">
+                  <i class="fa-solid fa-spinner text-brand-500 text-xs"></i>
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-slate-800 dark:text-white">Q2 2026 — Brand Protection <span class="text-xs font-normal text-brand-500 ml-1">In Progress</span></p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">File trademark applications for "FlowSync" word mark and combined logo mark. Conduct prior art search for design patent filing.</p>
+                </div>
+              </div>
+              <!-- Q3 -->
+              <div class="flex items-start space-x-4">
+                <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 z-10 border-2 border-white dark:border-slate-900">
+                  <i class="fa-solid fa-clock text-slate-400 text-xs"></i>
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-slate-800 dark:text-white">Q3 2026 — Design Patent <span class="text-xs font-normal text-slate-400 ml-1">Upcoming</span></p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">File design patent applications for the unique dashboard UI components. Prepare detailed patent drawings documenting ornamental design elements.</p>
+                </div>
+              </div>
+              <!-- Q4 -->
+              <div class="flex items-start space-x-4">
+                <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 z-10 border-2 border-white dark:border-slate-900">
+                  <i class="fa-solid fa-clock text-slate-400 text-xs"></i>
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-slate-800 dark:text-white">Q4 2026 — Enforcement Strategy <span class="text-xs font-normal text-slate-400 ml-1">Upcoming</span></p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Establish monitoring for potential IP infringement. Build IP licensing framework for enterprise partnerships. Review and update IP portfolio.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legal Notice -->
+        <div class="bg-slate-100 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/50">
+          <div class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-scale-balanced text-slate-500 text-sm"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-700 dark:text-slate-200 text-sm mb-2">Legal Notice</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                © 2026 FlowSync. All rights reserved. FlowSync, the FlowSync logo, and all associated visual designs are the property of FlowSync and are protected by applicable intellectual property laws. Unauthorized copying, modification, distribution, or use of any FlowSync materials is strictly prohibited. The AI prioritization algorithm is a proprietary trade secret. For licensing inquiries, please contact the FlowSync legal team.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ═══ MOBILE BOTTOM NAV ═══ -->
+    <nav class="fixed bottom-0 left-0 right-0 md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-40 bottom-nav">
+      <div class="grid grid-cols-4 h-16">
+        <a href="dashboard.html" class="flex flex-col items-center justify-center text-slate-400 text-xs"><i class="fa-solid fa-chart-line text-lg mb-1"></i>Dashboard</a>
+        <a href="tasks.html"     class="flex flex-col items-center justify-center text-slate-400 text-xs"><i class="fa-solid fa-list-check text-lg mb-1"></i>Tasks</a>
+        <a href="pomodoro.html"  class="flex flex-col items-center justify-center text-slate-400 text-xs"><i class="fa-solid fa-stopwatch text-lg mb-1"></i>Focus</a>
+        <a href="report.html"    class="flex flex-col items-center justify-center text-slate-400 text-xs"><i class="fa-solid fa-chart-pie text-lg mb-1"></i>Reports</a>
+      </div>
+    </nav>
+  </div>
+
+  <script src="js/store.js"></script>
+  <script>
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('-translate-x-full');document.getElementById('sidebarOverlay').classList.toggle('active')}
+    function toggleTheme(){document.documentElement.classList.toggle('dark');Store.setTheme(document.documentElement.classList.contains('dark')?'dark':'light')}
+
+    /* ─── Keyboard Shortcuts ─── */
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+      const key = e.key.toLowerCase();
+      if (key === 'd') window.location.href = 'dashboard.html';
+      if (key === 't') window.location.href = 'tasks.html';
+      if (key === 'p') window.location.href = 'pomodoro.html';
+      if (key === 'r') window.location.href = 'report.html';
+      if (key === 'i') window.location.href = 'ipr.html';
+      if (key === '?') alert('⌨️ Keyboard Shortcuts\n\nD = Dashboard\nT = Tasks\nP = Focus Timer\nR = Reports\nI = IPR & Legal');
+    });
+  </script>
+</body>
+</html>

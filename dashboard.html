@@ -67,6 +67,16 @@
 
     /* Mobile bottom nav safe area */
     .bottom-nav{padding-bottom:env(safe-area-inset-bottom,0)}
+
+    /* Survey modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:50;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity 0.3s}
+    .modal-overlay.active{opacity:1;pointer-events:all}
+    .modal-content{transform:scale(0.95);transition:transform 0.3s}
+    .modal-overlay.active .modal-content{transform:scale(1)}
+
+    /* Goal edit input */
+    .goal-edit-input{width:60px;text-align:center;font-weight:800;font-size:0.875rem;background:transparent;border:1.5px solid #818cf8;border-radius:0.5rem;padding:2px 4px;color:inherit;outline:none}
+    .goal-edit-input:focus{box-shadow:0 0 0 2px rgba(99,102,241,0.3)}
   </style>
 </head>
 
@@ -88,6 +98,7 @@
         <a href="tasks.html"     class="nav-link"><i class="fa-solid fa-list-check w-5 text-center"></i><span>Tasks</span></a>
         <a href="pomodoro.html"  class="nav-link"><i class="fa-solid fa-stopwatch w-5 text-center"></i><span>Focus Timer</span></a>
         <a href="report.html"    class="nav-link"><i class="fa-solid fa-chart-pie w-5 text-center"></i><span>Reports</span></a>
+        <a href="ipr.html"       class="nav-link"><i class="fa-solid fa-shield-halved w-5 text-center"></i><span>IPR & Legal</span></a>
       </nav>
       <!-- Bottom -->
       <div class="p-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
@@ -98,6 +109,12 @@
         <a href="index.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
           <i class="fa-solid fa-arrow-left w-5 text-center"></i><span>Back to Home</span>
         </a>
+        <button onclick="clearAllData()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors">
+          <i class="fa-solid fa-trash-can w-5 text-center"></i><span>Clear All Data</span>
+        </button>
+        <button onclick="loadDemoData()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-950/30 transition-colors">
+          <i class="fa-solid fa-database w-5 text-center"></i><span>Load Demo Data</span>
+        </button>
       </div>
     </aside>
 
@@ -118,6 +135,10 @@
             </div>
           </div>
           <div class="flex items-center space-x-3">
+            <button onclick="toast('Google Calendar Sync coming in v2.0!')" class="hidden sm:flex items-center space-x-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <i class="fa-brands fa-google text-brand-500 text-xs"></i>
+              <span>Connect Calendar</span>
+            </button>
             <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center md:hidden">
               <i class="fa-solid fa-moon text-slate-600 dark:hidden text-sm"></i><i class="fa-solid fa-sun text-yellow-400 hidden dark:block text-sm"></i>
             </button>
@@ -144,9 +165,9 @@
           </div>
         </div>
 
-        <!-- ─── STAT CARDS (4-up) ─── -->
+        <!-- ─── UNIFIED STAT CARDS GRID ─── -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Tasks Completed -->
+          <!-- Row 1: Tasks Completed -->
           <div class="stat-card bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
             <div class="flex items-center justify-between mb-3">
               <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Tasks Done</p>
@@ -183,32 +204,33 @@
             <button onclick="logDistraction()" class="text-xs text-rose-500 hover:text-rose-600 font-medium mt-1 hover:underline">+ Log distraction</button>
           </div>
 
-        <!-- ─── STREAK + DAILY GOAL ─── -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Streak Card -->
+          <!-- Row 2: Streak Card (col-span-1) -->
           <div class="stat-card bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
             <div class="flex items-center justify-between mb-3">
-              <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Focus Streak</p>
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 cursor-help" title="Consecutive days with at least one focus session">Focus Streak</p>
               <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20"><span class="text-sm">🔥</span></div>
             </div>
             <p class="text-3xl font-extrabold text-slate-900 dark:text-white counter" id="streakCount">0</p>
             <p class="text-xs text-slate-400 mt-1">consecutive days</p>
           </div>
-          <!-- Daily Goal Card (spans 2 cols on lg) -->
-          <div class="stat-card lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+          <!-- Daily Goal Card (col-span-2 on lg) -->
+          <div class="stat-card col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
             <div class="flex items-center justify-between mb-3">
               <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Daily Focus Goal</p>
-              <div class="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center"><i class="fa-solid fa-bullseye text-brand-500 text-sm"></i></div>
+              <div class="flex items-center space-x-1">
+                <button onclick="editGoal()" title="Edit daily goal" class="w-7 h-7 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-950/30 flex items-center justify-center text-slate-400 hover:text-brand-500 transition-colors"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
+                <div class="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-950/40 flex items-center justify-center"><i class="fa-solid fa-bullseye text-brand-500 text-sm"></i></div>
+              </div>
             </div>
             <div class="flex items-end justify-between mb-2">
-              <p class="text-3xl font-extrabold text-slate-900 dark:text-white counter"><span id="goalCurrent">0</span><span class="text-base text-slate-400 ml-1">/ 240 min</span></p>
+              <p class="text-3xl font-extrabold text-slate-900 dark:text-white counter"><span id="goalCurrent">0</span><span class="text-base text-slate-400 ml-1" id="goalTargetLabel">/ 240 min</span></p>
             </div>
             <div class="h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
               <div class="h-full rounded-full bg-gradient-to-r from-brand-500 to-accent-500 transition-all duration-1000" id="goalBar" style="width:0%"></div>
             </div>
             <p class="text-[11px] text-slate-400 mt-2" id="goalMsg">Start a focus session to make progress!</p>
           </div>
-          <!-- Best Day Card -->
+          <!-- Best Day Card (col-span-1) -->
           <div class="stat-card bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
             <div class="flex items-center justify-between mb-3">
               <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Best Day</p>
@@ -217,7 +239,6 @@
             <p class="text-3xl font-extrabold text-slate-900 dark:text-white counter" id="bestDayLabel">—</p>
             <p class="text-xs text-slate-400 mt-1" id="bestDaySub">this week</p>
           </div>
-        </div>
         </div>
 
         <!-- ─── CHARTS ROW ─── -->
@@ -233,7 +254,7 @@
 
           <!-- Work-Life Balance -->
           <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center">
-            <h3 class="font-bold text-slate-800 dark:text-white text-sm mb-5">Work-Life Balance</h3>
+            <h3 class="font-bold text-slate-800 dark:text-white text-sm mb-5 cursor-help" title="Score based on focus limits, break frequency, and distractions">Work-Life Balance</h3>
             <div class="relative mb-4">
               <svg width="140" height="140" viewBox="0 0 140 140" class="transform -rotate-90">
                 <circle cx="70" cy="70" r="56" fill="none" stroke-width="10" class="stroke-slate-200 dark:stroke-slate-800" />
@@ -267,6 +288,11 @@
           </div>
         </div>
 
+        <!-- ─── Keyboard Shortcuts Footer ─── -->
+        <div class="text-center py-2">
+          <p class="text-xs text-slate-400 dark:text-slate-500">⌨️ Shortcuts: <kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-mono text-[10px] border border-slate-200 dark:border-slate-700">n</kbd> = new task &nbsp; <kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-mono text-[10px] border border-slate-200 dark:border-slate-700">Space</kbd> = start/pause timer</p>
+        </div>
+
       </div><!-- /content -->
     </main>
 
@@ -285,6 +311,75 @@
   <div id="toast" class="toast-el bg-emerald-500 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3">
     <i class="fa-solid fa-check"></i><span id="toastMsg">Done!</span>
   </div>
+
+  <!-- ═══ GOAL EDIT MODAL ═══ -->
+  <div id="goalModal" class="modal-overlay" onclick="if(event.target===this)closeGoalModal()">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-sm w-full p-7 border border-slate-200 dark:border-slate-700 relative">
+      <button onclick="closeGoalModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"><i class="fa-solid fa-xmark text-sm"></i></button>
+      <h3 class="text-lg font-extrabold text-slate-900 dark:text-white mb-2">Set Daily Focus Goal</h3>
+      <p class="text-sm text-slate-400 mb-5">How many minutes of focused work do you want to aim for each day?</p>
+      <div class="flex items-center space-x-3 mb-5">
+        <input type="number" id="goalInput" min="1" max="1440" value="240" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition" />
+        <span class="text-sm text-slate-400 font-medium whitespace-nowrap">minutes</span>
+      </div>
+      <div class="flex items-center space-x-2 mb-5 flex-wrap gap-2">
+        <button onclick="document.getElementById('goalInput').value=120" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/30 dark:hover:text-brand-400 transition-colors">2h</button>
+        <button onclick="document.getElementById('goalInput').value=180" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/30 dark:hover:text-brand-400 transition-colors">3h</button>
+        <button onclick="document.getElementById('goalInput').value=240" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/30 dark:hover:text-brand-400 transition-colors">4h</button>
+        <button onclick="document.getElementById('goalInput').value=360" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/30 dark:hover:text-brand-400 transition-colors">6h</button>
+        <button onclick="document.getElementById('goalInput').value=480" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/30 dark:hover:text-brand-400 transition-colors">8h</button>
+      </div>
+      <button onclick="saveGoal()" class="w-full py-3 text-sm font-bold text-white rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 shadow-lg shadow-brand-500/25 transition-all">
+        <i class="fa-solid fa-check mr-2"></i>Save Goal
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ SURVEY MODAL ═══ -->
+  <div id="surveyModal" class="modal-overlay" onclick="if(event.target===this)closeSurveyModal()">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-lg w-full p-7 border border-slate-200 dark:border-slate-700 relative">
+      <button onclick="closeSurveyModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"><i class="fa-solid fa-xmark text-sm"></i></button>
+      <div class="flex items-center space-x-2 mb-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center"><i class="fa-solid fa-comment-dots text-white text-xs"></i></div>
+        <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">Quick Feedback</h3>
+      </div>
+      <p class="text-sm text-slate-400 mb-5">Help us make FlowSync better! Takes 30 seconds.</p>
+      <form onsubmit="submitSurvey(event)" class="space-y-4" id="surveyForm">
+        <div>
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block">1. What's your biggest productivity challenge?</label>
+          <textarea id="sq1" rows="2" placeholder="e.g. Staying focused, too many tasks, procrastination…" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition resize-none" required></textarea>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block">2. How many hours do you typically focus per day?</label>
+          <select id="sq2" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition" required>
+            <option value="">Select…</option>
+            <option value="<2">Less than 2 hours</option>
+            <option value="2-4">2–4 hours</option>
+            <option value="4-6">4–6 hours</option>
+            <option value="6+">6+ hours</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block">3. What feature would you most want us to add next?</label>
+          <textarea id="sq3" rows="2" placeholder="e.g. Calendar integration, team features, mobile app…" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition resize-none" required></textarea>
+        </div>
+        <button type="submit" class="w-full py-3 text-sm font-bold text-white rounded-xl bg-gradient-to-r from-brand-600 to-accent-500 hover:from-brand-500 hover:to-accent-400 shadow-lg shadow-brand-500/25 transition-all">
+          <i class="fa-solid fa-paper-plane mr-2"></i>Submit Feedback
+        </button>
+      </form>
+      <!-- Thank you state -->
+      <div id="surveyThanks" class="hidden text-center py-8">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center"><i class="fa-solid fa-heart text-emerald-500 text-2xl"></i></div>
+        <h4 class="text-lg font-bold text-slate-900 dark:text-white mb-1">Thank You! 💚</h4>
+        <p class="text-sm text-slate-400">Your feedback helps us build a better FlowSync.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SURVEY FLOATING BUTTON ═══ -->
+  <button id="surveyFab" onclick="openSurveyModal()" class="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 w-12 h-12 rounded-full bg-gradient-to-br from-brand-600 to-accent-500 text-white shadow-xl shadow-brand-500/30 flex items-center justify-center hover:shadow-brand-500/50 hover:scale-110 transition-all duration-200" title="Share Feedback">
+    <i class="fa-solid fa-comment-dots text-lg"></i>
+  </button>
 
   <!-- ═══ JAVASCRIPT ═══ -->
   <script src="js/store.js"></script>
@@ -305,6 +400,23 @@
       setTimeout(() => t.classList.remove('show'), 3000);
     }
 
+    /* ─── Data Management ─── */
+    function clearAllData() {
+      if (!confirm('Delete all tasks, sessions, and distractions? This cannot be undone.')) return;
+      Store.clearAll();
+      refreshDashboard();
+      renderWeeklyChart();
+      toast('All data cleared');
+    }
+    function loadDemoData() {
+      if (!confirm('Load sample tasks and sessions? Your current data will be replaced.')) return;
+      Store.clearAll();
+      Store.seedIfEmpty();
+      refreshDashboard();
+      renderWeeklyChart();
+      toast('Demo data loaded');
+    }
+
     /* ─── Greeting ─── */
     const hour = new Date().getHours();
     const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -314,6 +426,7 @@
     /* ─── Populate Stats ─── */
     function refreshDashboard() {
       const s = Store.getTodayStats();
+      const goalTarget = Store.getDailyGoal();
 
       document.getElementById('statTasks').textContent         = s.tasksCompleted;
       document.getElementById('statFocus').textContent         = s.focusHours + 'h';
@@ -326,14 +439,15 @@
       const streak = Store.getStreak();
       document.getElementById('streakCount').textContent = streak;
 
-      // Daily goal (target: 240 min = 4 hrs)
-      const goalPct = Math.min((s.focusMinutes / 240) * 100, 100);
+      // Daily goal (customizable target)
+      document.getElementById('goalTargetLabel').textContent = '/ ' + goalTarget + ' min';
+      const goalPct = Math.min((s.focusMinutes / goalTarget) * 100, 100);
       document.getElementById('goalCurrent').textContent = s.focusMinutes;
       document.getElementById('goalBar').style.width     = goalPct + '%';
       const gMsg = document.getElementById('goalMsg');
       if (goalPct >= 100)    gMsg.textContent = '🎉 Goal reached! Incredible work today.';
       else if (goalPct >= 60) gMsg.textContent = '💪 Great progress — keep it up!';
-      else if (goalPct > 0)  gMsg.textContent = '🚀 On your way — ' + Math.round(240 - s.focusMinutes) + ' min to go!';
+      else if (goalPct > 0)  gMsg.textContent = '🚀 On your way — ' + Math.round(goalTarget - s.focusMinutes) + ' min to go!';
       else                   gMsg.textContent = 'Start a focus session to make progress!';
 
       // Best day this week
@@ -434,6 +548,75 @@
       refreshDashboard();
       toast('Distraction logged');
     }
+
+    /* ─── Goal Modal ─── */
+    function editGoal() {
+      document.getElementById('goalInput').value = Store.getDailyGoal();
+      document.getElementById('goalModal').classList.add('active');
+    }
+    function closeGoalModal() {
+      document.getElementById('goalModal').classList.remove('active');
+    }
+    function saveGoal() {
+      const val = parseInt(document.getElementById('goalInput').value, 10);
+      if (!val || val < 1) { toast('Please enter a valid number'); return; }
+      Store.setDailyGoal(val);
+      closeGoalModal();
+      refreshDashboard();
+      toast('Daily goal updated to ' + Store.getDailyGoal() + ' min');
+    }
+
+    /* ─── Survey Modal ─── */
+    function openSurveyModal() {
+      const modal = document.getElementById('surveyModal');
+      const form = document.getElementById('surveyForm');
+      const thanks = document.getElementById('surveyThanks');
+      // Always show fresh form for new submission
+      form.classList.remove('hidden');
+      thanks.classList.add('hidden');
+      modal.classList.add('active');
+    }
+    function closeSurveyModal() {
+      document.getElementById('surveyModal').classList.remove('active');
+    }
+    function submitSurvey(e) {
+      e.preventDefault();
+      const sq1 = document.getElementById('sq1').value.trim();
+      const sq3 = document.getElementById('sq3').value.trim();
+      if (!sq1 && !sq3) {
+        toast('Please share at least one thought!');
+        return;
+      }
+
+      Store.saveSurvey({
+        challenge:   sq1,
+        focusHours:  document.getElementById('sq2').value,
+        featureWish: sq3,
+        submittedAt: new Date().toISOString(),
+      });
+      // Reset form fields for next time
+      document.getElementById('sq1').value = '';
+      document.getElementById('sq2').value = '';
+      document.getElementById('sq3').value = '';
+      // Show thank you briefly, then auto-close
+      document.getElementById('surveyForm').classList.add('hidden');
+      document.getElementById('surveyThanks').classList.remove('hidden');
+      toast('Thank you for your feedback!');
+      setTimeout(() => closeSurveyModal(), 2500);
+    }
+
+    /* ─── Keyboard Shortcuts ─── */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { closeGoalModal(); closeSurveyModal(); }
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+      const key = e.key.toLowerCase();
+      if (key === 'n') window.location.href = 'tasks.html';
+      if (key === 't') window.location.href = 'tasks.html';
+      if (key === 'p') window.location.href = 'pomodoro.html';
+      if (key === 'r') window.location.href = 'report.html';
+      if (key === 'i') window.location.href = 'ipr.html';
+      if (key === '?') alert('⌨️ Keyboard Shortcuts\n\nD = Dashboard\nT = Tasks\nP = Focus Timer\nR = Reports\nI = IPR & Legal\nN = New Task (Tasks page)\nSpace = Start/Pause Timer (Focus page)');
+    });
 
     /* ─── Init ─── */
     refreshDashboard();

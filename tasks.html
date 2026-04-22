@@ -79,6 +79,7 @@
         <a href="tasks.html"     class="nav-link active"><i class="fa-solid fa-list-check w-5 text-center"></i><span>Tasks</span></a>
         <a href="pomodoro.html"  class="nav-link"><i class="fa-solid fa-stopwatch w-5 text-center"></i><span>Focus Timer</span></a>
         <a href="report.html"    class="nav-link"><i class="fa-solid fa-chart-pie w-5 text-center"></i><span>Reports</span></a>
+        <a href="ipr.html"       class="nav-link"><i class="fa-solid fa-shield-halved w-5 text-center"></i><span>IPR & Legal</span></a>
       </nav>
       <div class="p-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
         <button onclick="toggleTheme()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
@@ -334,7 +335,7 @@
             <div class="flex items-start justify-between gap-2">
               <p class="task-title text-sm font-semibold text-slate-800 dark:text-slate-200">${escHtml(t.title)}</p>
               <div class="flex items-center space-x-2 flex-shrink-0">
-                ${sortMode === 'ai' && !t.completed ? `<div class="text-right"><p class="text-xs font-bold text-brand-600 dark:text-brand-400">${t.aiScore}</p><p class="text-[9px] text-slate-400 leading-none">AI</p></div>` : ''}
+                ${sortMode === 'ai' && !t.completed ? `<div class="text-right" title="AI Score (Priority + Deadline + Age + Quick-Win rounded to 100)"><p class="text-xs font-bold text-brand-600 dark:text-brand-400">${t.aiScore}</p><p class="text-[9px] text-slate-400 leading-none">AI</p></div>` : ''}
                 <button onclick="editTask('${t.id}')" class="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"><i class="fa-solid fa-pen text-[10px]"></i></button>
                 <button onclick="deleteTask('${t.id}')" class="w-7 h-7 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash text-[10px]"></i></button>
               </div>
@@ -427,8 +428,14 @@
     function saveTask(e) {
       e.preventDefault();
       const editId = document.getElementById('editId').value;
+      const title = document.getElementById('fTitle').value.trim();
+      if (!title) {
+        toast('Title cannot be empty');
+        return;
+      }
+
       const data = {
-        title:            document.getElementById('fTitle').value.trim(),
+        title:            title,
         description:      document.getElementById('fDesc').value.trim(),
         priority:         document.getElementById('fPriority').value,
         estimatedMinutes: parseInt(document.getElementById('fTime').value) || null,
@@ -449,10 +456,19 @@
     /* ─── Keyboard Shortcuts ─── */
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeModal();
-      if (e.key === 'n' && !e.ctrkKey && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+      const key = e.key.toLowerCase();
+      if (key === 'n') {
         e.preventDefault();
         openModal();
       }
+      if (key === 'd') window.location.href = 'dashboard.html';
+      if (key === 't') window.location.href = 'tasks.html';
+      if (key === 'p') window.location.href = 'pomodoro.html';
+      if (key === 'r') window.location.href = 'report.html';
+      if (key === 'i') window.location.href = 'ipr.html';
+      if (key === '?') alert('⌨️ Keyboard Shortcuts\n\nD = Dashboard\nT = Tasks\nP = Focus Timer\nR = Reports\nI = IPR & Legal\nN = New Task');
     });
 
     /* ─── Init ─── */
