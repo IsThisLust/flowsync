@@ -23,6 +23,9 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <!-- Tailwind Config -->
   <script>
     tailwind.config = {
@@ -998,53 +1001,16 @@
 
           <!-- Charts Row -->
           <div class="grid lg:grid-cols-3 gap-6">
-            <!-- Weekly Productivity Chart -->
+            <!-- Weekly Productivity Chart (Paper/Analog Theme) -->
             <div
-              class="lg:col-span-2 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-700/50">
-              <div class="flex items-center justify-between mb-6">
-                <h4 class="font-bold text-slate-800 dark:text-white text-sm">Weekly Productivity Trend</h4>
-                <span
-                  class="text-xs px-3 py-1 rounded-full bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 font-medium">This
-                  Week</span>
+              class="lg:col-span-2 rounded-2xl p-6 relative overflow-hidden"
+              style="background-color: #fdfcf8; box-shadow: 2px 4px 15px rgba(0,0,0,0.06); border: 1px solid #e8e5da; font-family: 'Comic Sans MS', cursive, sans-serif;">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="font-bold text-sm" style="color: #555; letter-spacing: 0.5px;">Weekly Productivity Trend</h4>
+                <span class="text-xs px-3 py-1 rounded-full font-medium" style="background-color: #f4f1e1; color: #7a7a7a; border: 1px dashed #d6d3c4;">This Week</span>
               </div>
-              <!-- SVG Bar Chart -->
-              <div class="flex items-end justify-between h-40 px-2">
-                <div class="flex flex-col items-center space-y-2 flex-1">
-                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-gradient-to-t from-brand-500 to-brand-400"
-                    style="height: 60%"></div>
-                  <span class="text-xs text-slate-400">Mon</span>
-                </div>
-                <div class="flex flex-col items-center space-y-2 flex-1">
-                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-gradient-to-t from-brand-500 to-brand-400"
-                    style="height: 75%"></div>
-                  <span class="text-xs text-slate-400">Tue</span>
-                </div>
-                <div class="flex flex-col items-center space-y-2 flex-1">
-                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-gradient-to-t from-brand-500 to-brand-400"
-                    style="height: 45%"></div>
-                  <span class="text-xs text-slate-400">Wed</span>
-                </div>
-                <div class="flex flex-col items-center space-y-2 flex-1">
-                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-gradient-to-t from-brand-500 to-brand-400"
-                    style="height: 90%"></div>
-                  <span class="text-xs text-slate-400">Thu</span>
-                </div>
-                <div class="flex flex-col items-center space-y-2 flex-1">
-                  <div
-                    class="w-full max-w-[40px] chart-bar rounded-t-lg bg-gradient-to-t from-accent-500 to-accent-400 shadow-lg shadow-accent-500/20"
-                    style="height: 85%"></div>
-                  <span class="text-xs font-semibold text-accent-500">Fri</span>
-                </div>
-                <div class="flex flex-col items-center space-y-2 flex-1">
-                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-slate-200 dark:bg-slate-700"
-                    style="height: 30%"></div>
-                  <span class="text-xs text-slate-400">Sat</span>
-                </div>
-                <div class="flex flex-col items-center space-y-2 flex-1">
-                  <div class="w-full max-w-[40px] chart-bar rounded-t-lg bg-slate-200 dark:bg-slate-700"
-                    style="height: 15%"></div>
-                  <span class="text-xs text-slate-400">Sun</span>
-                </div>
+              <div class="relative h-40 w-full">
+                <canvas id="homepageChart"></canvas>
               </div>
             </div>
 
@@ -1336,6 +1302,73 @@
       if (key === 'i') window.location.href = 'ipr.html';
       if (key === '?') alert('⌨️ Keyboard Shortcuts\n\nD = Dashboard\nT = Tasks\nP = Focus Timer\nR = Reports\nI = IPR & Legal');
     });
+
+    // ===== HOMEPAGE RANDOM CHART (PAPER THEME) =====
+    (function() {
+      if (typeof Chart === 'undefined') return;
+      const canvas = document.getElementById('homepageChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      // Generate random data between 30 and 180
+      const randomData = Array.from({length: 7}, () => Math.floor(Math.random() * 151) + 30);
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{
+            label: 'Focus Minutes',
+            data: randomData,
+            backgroundColor: '#8da399', // muted sketchy green
+            borderColor: '#5c7368', // darker outline for analog feel
+            borderWidth: 2,
+            borderRadius: 6,
+            borderSkipped: false,
+            barPercentage: 0.65
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#fcfbf8',
+              titleColor: '#4a4a4a',
+              bodyColor: '#4a4a4a',
+              borderColor: '#d1cebc',
+              borderWidth: 1,
+              titleFont: { family: '"Comic Sans MS", cursive, sans-serif', size: 13 },
+              bodyFont: { family: '"Comic Sans MS", cursive, sans-serif', size: 12 },
+              padding: 10,
+              cornerRadius: 4
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: '#e2dfd5',
+                drawBorder: false,
+                tickLength: 0
+              },
+              ticks: {
+                color: '#7a7a7a',
+                font: { family: '"Comic Sans MS", cursive, sans-serif', size: 11 },
+                stepSize: 50
+              }
+            },
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: '#7a7a7a',
+                font: { family: '"Comic Sans MS", cursive, sans-serif', size: 12 }
+              }
+            }
+          }
+        }
+      });
+    })();
   </script>
 
 </body>
