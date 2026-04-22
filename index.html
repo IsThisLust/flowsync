@@ -1001,13 +1001,11 @@
 
           <!-- Charts Row -->
           <div class="grid lg:grid-cols-3 gap-6">
-            <!-- Weekly Productivity Chart (Paper/Analog Theme) -->
-            <div
-              class="lg:col-span-2 rounded-2xl p-6 relative overflow-hidden"
-              style="background-color: #fdfcf8; box-shadow: 2px 4px 15px rgba(0,0,0,0.06); border: 1px solid #e8e5da; font-family: 'Comic Sans MS', cursive, sans-serif;">
+            <!-- Weekly Productivity Chart -->
+            <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
               <div class="flex items-center justify-between mb-4">
-                <h4 class="font-bold text-sm" style="color: #555; letter-spacing: 0.5px;">Weekly Productivity Trend</h4>
-                <span class="text-xs px-3 py-1 rounded-full font-medium" style="background-color: #f4f1e1; color: #7a7a7a; border: 1px dashed #d6d3c4;">This Week</span>
+                <h4 class="font-bold text-slate-800 dark:text-white text-sm">Weekly Productivity Trend</h4>
+                <span class="text-xs px-3 py-1 rounded-full bg-brand-50 dark:bg-brand-950/30 text-brand-600 dark:text-brand-400 font-medium">This Week</span>
               </div>
               <div class="relative h-40 w-full">
                 <canvas id="homepageChart"></canvas>
@@ -1303,7 +1301,7 @@
       if (key === '?') alert('⌨️ Keyboard Shortcuts\n\nD = Dashboard\nT = Tasks\nP = Focus Timer\nR = Reports\nI = IPR & Legal');
     });
 
-    // ===== HOMEPAGE RANDOM CHART (PAPER THEME) =====
+    // ===== HOMEPAGE RANDOM CHART (MODERN THEME) =====
     (function() {
       if (typeof Chart === 'undefined') return;
       const canvas = document.getElementById('homepageChart');
@@ -1311,6 +1309,7 @@
       const ctx = canvas.getContext('2d');
       // Generate random data between 30 and 180
       const randomData = Array.from({length: 7}, () => Math.floor(Math.random() * 151) + 30);
+      const isDark = document.documentElement.classList.contains('dark');
       
       new Chart(ctx, {
         type: 'bar',
@@ -1319,10 +1318,11 @@
           datasets: [{
             label: 'Focus Minutes',
             data: randomData,
-            backgroundColor: '#8da399', // muted sketchy green
-            borderColor: '#5c7368', // darker outline for analog feel
-            borderWidth: 2,
-            borderRadius: 6,
+            backgroundColor: randomData.map((_, i) => i === 6 
+              ? 'rgba(20, 184, 166, 1)' // Today (Sun) - Accent teal
+              : (isDark ? 'rgba(99, 102, 241, 0.7)' : 'rgba(99, 102, 241, 1)')), // Brand indigo
+            borderWidth: 0,
+            borderRadius: 8,
             borderSkipped: false,
             barPercentage: 0.65
           }]
@@ -1333,36 +1333,33 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: '#fcfbf8',
-              titleColor: '#4a4a4a',
-              bodyColor: '#4a4a4a',
-              borderColor: '#d1cebc',
+              backgroundColor: isDark ? '#1e293b' : '#fff',
+              titleColor: isDark ? '#f8fafc' : '#0f172a',
+              bodyColor: isDark ? '#cbd5e1' : '#475569',
+              borderColor: isDark ? '#334155' : '#e2e8f0',
               borderWidth: 1,
-              titleFont: { family: '"Comic Sans MS", cursive, sans-serif', size: 13 },
-              bodyFont: { family: '"Comic Sans MS", cursive, sans-serif', size: 12 },
               padding: 10,
-              cornerRadius: 4
+              cornerRadius: 8
             }
           },
           scales: {
             y: {
               beginAtZero: true,
               grid: {
-                color: '#e2dfd5',
+                color: isDark ? '#1e293b' : '#f1f5f9',
                 drawBorder: false,
-                tickLength: 0
               },
               ticks: {
-                color: '#7a7a7a',
-                font: { family: '"Comic Sans MS", cursive, sans-serif', size: 11 },
+                color: isDark ? '#64748b' : '#94a3b8',
+                font: { family: 'Inter, sans-serif', size: 11 },
                 stepSize: 50
               }
             },
             x: {
               grid: { display: false },
               ticks: {
-                color: '#7a7a7a',
-                font: { family: '"Comic Sans MS", cursive, sans-serif', size: 12 }
+                color: isDark ? '#64748b' : '#94a3b8',
+                font: { family: 'Inter, sans-serif', size: 12, weight: (ctx) => ctx.index === 6 ? 'bold' : 'normal' }
               }
             }
           }
