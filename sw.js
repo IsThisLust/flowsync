@@ -4,7 +4,7 @@
  * Keeps it simple — cache-first for assets, network-first for pages.
  */
 
-const CACHE_NAME = 'flowsync-v3';
+const CACHE_NAME = 'flowsync-v10';
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -13,6 +13,8 @@ const SHELL_ASSETS = [
   './pomodoro.html',
   './report.html',
   './ipr.html',
+  './signup.html',
+  './waitlist.html',
   './js/store.js',
   './manifest.json',
 ];

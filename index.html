@@ -15,7 +15,11 @@
   <!-- Prevent theme flash and keep page transitions consistent -->
   <script>
     window.__fsApplyTheme = function () {
-      document.documentElement.classList.toggle('dark', localStorage.getItem('fs-theme') === 'dark');
+      let theme = localStorage.getItem('fs-theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.classList.toggle('dark', theme === 'dark');
     };
     window.__fsApplyTheme();
   </script>
@@ -34,6 +38,7 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
   <!-- Tailwind Config -->
   <script>
@@ -1096,6 +1101,166 @@
     </div>
   </section>
 
+  <!-- ============================================== -->
+  <!--  PRICING SECTION                                -->
+  <!-- ============================================== -->
+  <section id="pricing" class="py-24 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+        <h2 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
+          Simple, Transparent <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-accent-600">Pricing</span>
+        </h2>
+        <p class="text-lg text-slate-500 dark:text-slate-400">
+          Choose the plan that fits your productivity needs. Freemium model with premium features.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <!-- Free Tier -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm reveal-left flex flex-col">
+          <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Free</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Perfect to get started.</p>
+          <div class="mb-8">
+            <span class="text-5xl font-black text-slate-900 dark:text-white">₹0</span>
+            <span class="text-slate-500 dark:text-slate-400">/month</span>
+          </div>
+          <ul class="space-y-4 mb-8 flex-1">
+            <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">Basic task management</span></li>
+            <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">4 focus sessions per day</span></li>
+            <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">Limited reports</span></li>
+            <li class="flex items-start"><i class="fa-solid fa-xmark text-slate-300 dark:text-slate-600 mt-1 mr-3"></i><span class="text-sm text-slate-400 dark:text-slate-500">AI Scheduling</span></li>
+          </ul>
+          <a href="#" onclick="activateTrial(event)" class="w-full py-4 rounded-xl border-2 border-brand-100 dark:border-brand-900/30 bg-brand-50 dark:bg-brand-900/10 text-brand-600 dark:text-brand-400 font-bold hover:bg-brand-100 dark:hover:bg-brand-900/30 transition-colors text-center inline-block">Start Free Trial</a>
+        </div>
+
+        <!-- Premium Tier -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border-2 border-brand-500 shadow-xl relative reveal flex flex-col transform md:-translate-y-4">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-brand-500 to-accent-500 text-white text-xs font-black uppercase tracking-wider py-1.5 px-4 rounded-full shadow-md">
+            Most Popular
+          </div>
+          <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Premium</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">For power users & professionals.</p>
+          <div class="mb-8">
+            <span class="text-5xl font-black text-slate-900 dark:text-white">₹299</span>
+            <span class="text-slate-500 dark:text-slate-400">/month</span>
+          </div>
+          <ul class="space-y-4 mb-8 flex-1">
+            <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">Unlimited tasks & focus sessions</span></li>
+            <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">Full AI Scheduling & Prioritization</span></li>
+            <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">Rich productivity reports</span></li>
+            <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">Work-life balance alerts</span></li>
+            <li class="flex items-start"><i class="fa-solid fa-calendar-plus text-brand-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">Calendar sync (coming soon)</span></li>
+          </ul>
+          <a href="waitlist.html?plan=premium" class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-500 hover:to-accent-500 text-white font-bold shadow-md shadow-brand-500/20 transition-all text-center inline-block">Enter Waitlist</a>
+        </div>
+
+        <!-- Team Tier -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm reveal-right flex flex-col">
+          <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Team</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Collaborate and track progress.</p>
+          <div class="mb-8">
+            <span class="text-5xl font-black text-slate-900 dark:text-white">₹999</span>
+            <span class="text-slate-500 dark:text-slate-400">/month</span>
+            <p class="text-xs text-slate-400 mt-1">Up to 5 users</p>
+          </div>
+          <ul class="space-y-4 mb-8 flex-1">
+            <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">Everything in Premium</span></li>
+            <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">Team productivity dashboards</span></li>
+            <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">Admin controls & billing</span></li>
+            <li class="flex items-start"><i class="fa-solid fa-check text-emerald-500 mt-1 mr-3"></i><span class="text-sm text-slate-600 dark:text-slate-300">Priority support</span></li>
+          </ul>
+          <a href="waitlist.html?plan=team" class="w-full py-4 rounded-xl border-2 border-brand-100 dark:border-brand-900/30 bg-brand-50 dark:bg-brand-900/10 text-brand-600 dark:text-brand-400 font-bold hover:bg-brand-100 dark:hover:bg-brand-900/30 transition-colors text-center inline-block">Enter Waitlist</a>
+        </div>
+      </div>
+
+      <div class="mt-12 text-center reveal">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Looking for an Enterprise solution? Custom deployment and tailored pricing available.</p>
+        <button id="contactSalesBtn" type="button" class="inline-block px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Contact Sales</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="contactSalesModal" class="fixed inset-0 z-[60] hidden items-center justify-center px-4 py-6">
+    <div id="contactSalesBackdrop" class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm"></div>
+    <div class="relative w-full max-w-lg rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl shadow-black/30 overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+        <div>
+          <p class="text-xs font-bold tracking-[0.2em] uppercase text-brand-500">Contact Developer</p>
+          <h3 class="text-xl font-black text-slate-900 dark:text-white">Aaditya Rajbhar</h3>
+        </div>
+        <button id="closeContactSalesModal" type="button" class="w-10 h-10 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" aria-label="Close contact sales dialog">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="px-6 py-6 space-y-4">
+        <p class="text-sm text-slate-600 dark:text-slate-400">For enterprise enquiries, custom deployment, or partnership opportunities, please reach out directly.</p>
+        <div class="grid gap-3">
+          <a href="mailto:rajbharaadityawork@gmail.com" class="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <span class="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-300">
+              <i class="fa-solid fa-envelope"></i>
+            </span>
+            <div class="text-left">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Email</p>
+              <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">rajbharaadityawork@gmail.com</p>
+            </div>
+          </a>
+          <a href="tel:+917007611899" class="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <span class="w-10 h-10 rounded-xl bg-accent-50 dark:bg-accent-950/30 flex items-center justify-center text-accent-600 dark:text-accent-300">
+              <i class="fa-solid fa-phone"></i>
+            </span>
+            <div class="text-left">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Phone</p>
+              <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">+91 70076 11899</p>
+            </div>
+          </a>
+          <div class="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 px-4 py-3">
+            <span class="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-950/30 flex items-center justify-center text-violet-600 dark:text-violet-300">
+              <i class="fa-solid fa-location-dot"></i>
+            </span>
+            <div class="text-left">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Location</p>
+              <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Lucknow, India</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function activateTrial(e) {
+      e.preventDefault();
+      localStorage.setItem('fs-trial-active', 'true');
+      window.location.href = 'dashboard.html?trial=started';
+    }
+
+    const contactSalesModal = document.getElementById('contactSalesModal');
+    const contactSalesBtn = document.getElementById('contactSalesBtn');
+    const closeContactSalesModalBtn = document.getElementById('closeContactSalesModal');
+    const contactSalesBackdrop = document.getElementById('contactSalesBackdrop');
+
+    function openContactSalesModal() {
+      if (!contactSalesModal) return;
+      contactSalesModal.classList.remove('hidden');
+      contactSalesModal.classList.add('flex');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeContactSalesModal() {
+      if (!contactSalesModal) return;
+      contactSalesModal.classList.add('hidden');
+      contactSalesModal.classList.remove('flex');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    contactSalesBtn?.addEventListener('click', openContactSalesModal);
+    closeContactSalesModalBtn?.addEventListener('click', closeContactSalesModal);
+    contactSalesBackdrop?.addEventListener('click', closeContactSalesModal);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeContactSalesModal();
+    });
+  </script>
 
   <!-- ============================================== -->
   <!--  FOOTER                                         -->
@@ -1279,6 +1444,43 @@
     }, { threshold: 0.3 });
 
     progressBars.forEach(el => progressObserver.observe(el));
+
+
+    // ===== STAT NUMBER COUNTER ANIMATION =====
+    const statNumbers = document.querySelectorAll('.stat-number');
+    
+    const countObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const target = parseInt(el.getAttribute('data-target'));
+          const duration = 1500; // 1.5 seconds
+          const start = 0;
+          const startTime = performance.now();
+          
+          function updateCount(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out cubic
+            const easedProgress = 1 - Math.pow(1 - progress, 3);
+            const currentCount = Math.floor(easedProgress * target);
+            
+            el.textContent = currentCount;
+            
+            if (progress < 1) {
+              requestAnimationFrame(updateCount);
+            } else {
+              el.textContent = target;
+            }
+          }
+          
+          requestAnimationFrame(updateCount);
+          countObserver.unobserve(el);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    statNumbers.forEach(el => countObserver.observe(el));
 
 
     // ===== SMOOTH SCROLL FOR ANCHOR LINKS =====

@@ -10,7 +10,11 @@
 
   <script>
     window.__fsApplyTheme = function () {
-      document.documentElement.classList.toggle('dark', localStorage.getItem('fs-theme') === 'dark');
+      let theme = localStorage.getItem('fs-theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.classList.toggle('dark', theme === 'dark');
     };
     window.__fsApplyTheme();
   </script>

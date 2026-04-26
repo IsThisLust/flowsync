@@ -10,7 +10,11 @@
 
   <script>
     window.__fsApplyTheme = function () {
-      document.documentElement.classList.toggle('dark', localStorage.getItem('fs-theme') === 'dark');
+      let theme = localStorage.getItem('fs-theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.classList.toggle('dark', theme === 'dark');
     };
     window.__fsApplyTheme();
   </script>
@@ -97,6 +101,12 @@
         <a href="index.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
           <i class="fa-solid fa-arrow-left w-5 text-center"></i><span>Back to Home</span>
         </a>
+        <button onclick="clearAllData()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors">
+          <i class="fa-solid fa-trash-can w-5 text-center"></i><span>Clear All Data</span>
+        </button>
+        <button onclick="loadDemoData()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-950/30 transition-colors">
+          <i class="fa-solid fa-database w-5 text-center"></i><span>Load Demo Data</span>
+        </button>
       </div>
     </aside>
 
@@ -176,7 +186,13 @@
             <!-- Task Selector -->
             <div class="w-full max-w-md">
               <label class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 block">Working on:</label>
-              <input type="text" id="taskDescription" placeholder="What are you working on? (e.g., 'Write report', 'Code review')" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition" />
+              <div class="relative group">
+                <i class="fa-solid fa-list-check absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs transition-colors group-focus-within:text-brand-500"></i>
+                <input type="text" id="taskSelector" list="taskList" onchange="saveTimerState()" placeholder="No specific task (General focus)" autocomplete="off"
+                  class="w-full pl-10 pr-10 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition shadow-sm">
+                <datalist id="taskList"></datalist>
+                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none opacity-50"></i>
+              </div>
             </div>
 
             <!-- Keyboard hint -->
@@ -259,6 +275,19 @@
   <script src="js/store.js"></script>
   <script>
     /* ─── Helpers ─── */
+    /* ─── Data Management ─── */
+    function clearAllData() {
+      if (!confirm('Delete all tasks, sessions, and distractions? This cannot be undone.')) return;
+      Store.clearAll();
+      location.reload(); // Refresh to clear timer state
+    }
+    function loadDemoData() {
+      if (!confirm('Load sample tasks and sessions? Your current data will be replaced.')) return;
+      Store.clearAll();
+      Store.seedIfEmpty(true);
+      location.reload();
+    }
+
     function toggleSidebar(){document.getElementById('sidebar').classList.toggle('-translate-x-full');document.getElementById('sidebarOverlay').classList.toggle('active')}
     function toggleTheme(){document.documentElement.classList.toggle('dark');Store.setTheme(document.documentElement.classList.contains('dark')?'dark':'light');if(window.__fsApplyTheme)window.__fsApplyTheme()}
     function toast(msg){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
@@ -284,12 +313,14 @@
     const TIMER_KEY = 'fs-timer-state';
 
     function saveTimerState() {
+      const selector = document.getElementById('taskSelector');
       const state = {
         mode:       timer.mode,
         endTime:    timer.running ? Date.now() + timer.remaining * 1000 : null,
         remaining:  timer.remaining,
         running:    timer.running,
         sessionsCompleted: timer.sessionsCompleted,
+        taskId:     selector ? selector.value : null,
         savedAt:    Date.now(),
       };
       localStorage.setItem(TIMER_KEY, JSON.stringify(state));
@@ -481,11 +512,16 @@
 
       if (timer.mode === 'focus') {
         // Save focus session
-        const desc = document.getElementById('taskDescription').value.trim() || null;
+        const input = document.getElementById('taskSelector');
+        const val = (input ? input.value : '').trim();
+        const allTasks = Store.getTasks();
+        const match = allTasks.find(t => t.title === val);
+        
         Store.addSession({
           type:        'focus',
           duration:    MODES.focus.duration / 60,
-          description: desc,
+          description: val || 'General focus',
+          taskId:      match ? match.id : null
         });
         timer.sessionsCompleted++;
         toast('🎉 Focus session complete!');
@@ -585,9 +621,37 @@
       }
       document.getElementById('streak').textContent = streak + ' day' + (streak !== 1 ? 's' : '');
 
+      // Update Task Selector Suggestions
+      const tasks = Store.getTasks().filter(t => !t.completed);
+      const dl = document.getElementById('taskList');
+      const selector = document.getElementById('taskSelector');
+      
+      if (dl) {
+        dl.innerHTML = '';
+        tasks.forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t.title;
+          dl.appendChild(opt);
+        });
+      }
+
+      // Check for query param (START from dashboard)
+      const urlParams = new URLSearchParams(window.location.search);
+      const taskId = urlParams.get('task');
+      if (taskId && selector) {
+        const task = Store.getTasks().find(t => t.id === taskId);
+        if (task) {
+          selector.value = task.title;
+          window.history.replaceState({}, document.title, window.location.pathname);
+          saveTimerState();
+        }
+      }
+
       // Recent sessions
       renderRecentSessions();
     }
+
+
 
     function renderRecentSessions() {
       const today    = Store._localDateKey();
@@ -598,7 +662,13 @@
         return;
       }
       el.innerHTML = sessions.map(s => {
-        const time = new Date(s.endTime).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+        let time = 'Unknown';
+        if (s.endTime) {
+          const d = new Date(s.endTime);
+          if (!Number.isNaN(d.getTime())) {
+            time = d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+          }
+        }
         const icon = s.type === 'focus' ? 'fa-check-circle text-emerald-500' : 'fa-mug-hot text-amber-500';
         const label = s.type === 'focus' ? '🎯 Focus' : (s.type === 'longBreak' ? '🍵 Long break' : '☕ Break');
         return `<div class="flex items-center justify-between py-1.5 border-b border-slate-50 dark:border-slate-800 last:border-0">
@@ -622,12 +692,16 @@
         e.preventDefault();
         toggleTimer();
       }
+      if (e.altKey && key === 'd') {
+        e.preventDefault();
+        logDistraction();
+      }
       const key = e.key.toLowerCase();
-      if (key === 'd') window.location.href = 'dashboard.html';
+      if (key === 'd' && !e.altKey) window.location.href = 'dashboard.html';
       if (key === 't') window.location.href = 'tasks.html';
       if (key === 'r') window.location.href = 'report.html';
       if (key === 'i') window.location.href = 'ipr.html';
-      if (key === '?') alert('⌨️ Keyboard Shortcuts\n\nSpace = Start/Pause Timer\nD = Dashboard\nT = Tasks\nR = Reports\nI = IPR & Legal');
+      if (key === '?') alert('⌨️ Keyboard Shortcuts\n\nSpace = Start/Pause Timer\nAlt + D = Log Distraction\nD = Dashboard\nT = Tasks\nR = Reports\nI = IPR & Legal');
     });
 
     /* ─── Init ─── */

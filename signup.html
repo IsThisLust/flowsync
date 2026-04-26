@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Go Premium - FlowSync</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand:  { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+            accent: { 400:'#2dd4bf',500:'#14b8a6',600:'#0d9488' },
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .dark ::-webkit-scrollbar-thumb { background: #334155; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+
+  <script>
+    window.__fsApplyTheme = function () {
+      let theme = localStorage.getItem('fs-theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+    };
+    window.__fsApplyTheme();
+  </script>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-300 min-h-screen flex flex-col justify-center relative overflow-hidden">
+  
+  <!-- Background Decorations -->
+  <div class="fixed top-0 inset-x-0 h-96 bg-gradient-to-b from-brand-500/10 to-transparent dark:from-brand-900/20 pointer-events-none z-0"></div>
+  <div class="fixed top-[-10%] right-[-5%] w-96 h-96 rounded-full bg-brand-400/20 dark:bg-brand-600/10 blur-3xl pointer-events-none z-0"></div>
+  <div class="fixed bottom-[-10%] left-[-5%] w-96 h-96 rounded-full bg-accent-400/20 dark:bg-accent-600/10 blur-3xl pointer-events-none z-0"></div>
+
+  <div class="relative z-10 max-w-lg w-full mx-auto px-4 py-12">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <a href="index.html" class="inline-flex items-center justify-center space-x-2">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-lg">
+          <i class="fa-solid fa-bolt text-white text-base"></i>
+        </div>
+        <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">FlowSync</span>
+      </a>
+    </div>
+
+    <!-- Form Container -->
+    <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-xl">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Upgrade to Premium</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Unlock your ultimate productivity potential for just ₹299/month.</p>
+      </div>
+
+      <form id="signupForm" onsubmit="handleSignup(event)" class="space-y-5">
+        
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Full Name</label>
+          <input type="text" id="fullName" required placeholder="e.g. John Doe" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
+          <input type="email" id="email" required placeholder="e.g. john@company.com" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Payment Details</label>
+          <div class="relative">
+            <i class="fa-regular fa-credit-card absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+            <input type="text" placeholder="Card Number" class="w-full pl-10 pr-4 py-3 rounded-t-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition border-b-0">
+          </div>
+          <div class="flex">
+            <input type="text" id="cardExpiry" placeholder="MM/YY" class="w-1/2 px-4 py-3 rounded-bl-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+            <input type="text" id="cardCvc" placeholder="CVC" class="w-1/2 px-4 py-3 rounded-br-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 border-l-0 dark:border-slate-700 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" id="submitBtn" disabled class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-600 to-accent-600 hover:from-brand-500 hover:to-accent-500 text-white font-bold shadow-md shadow-brand-500/20 transition-all text-center flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fa-solid fa-lock mr-2 text-xs opacity-75"></i> Subscribe & Pay ₹299
+          </button>
+        </div>
+      </form>
+
+      <p class="text-xs text-center text-slate-400 mt-6">By subscribing, you agree to our <a href="ipr.html" class="text-brand-500 hover:underline">Terms of Service</a> and <a href="ipr.html" class="text-brand-500 hover:underline">Privacy Policy</a>.</p>
+    </div>
+
+    <!-- Back to home -->
+    <div class="text-center mt-8">
+      <a href="index.html" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors">
+        <i class="fa-solid fa-arrow-left mr-2"></i>Back to Home
+      </a>
+    </div>
+
+  </div>
+
+  <script>
+    const form = document.getElementById('signupForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function checkForm() {
+      const isName = document.getElementById('fullName').value.trim().length > 0;
+      const isEmail = document.getElementById('email').value.trim().match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+      // Basic credit card validation (mock)
+      const isExpiry = document.getElementById('cardExpiry').value.trim().length >= 4;
+      const isCvc = document.getElementById('cardCvc').value.trim().length >= 3;
+      
+      submitBtn.disabled = !(isName && isEmail && isExpiry && isCvc);
+    }
+
+    form.querySelectorAll('input').forEach(el => {
+      el.addEventListener('input', checkForm);
+    });
+
+    function handleSignup(e) {
+      e.preventDefault();
+      if (submitBtn.disabled) return;
+
+      const btn = submitBtn;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Processing...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        // Activate trial/premium in local storage and redirect
+        localStorage.setItem('fs-trial-active', 'true');
+        window.location.href = 'dashboard.html?trial=started';
+      }, 1500);
+    }
+  </script>
+</body>
+</html>

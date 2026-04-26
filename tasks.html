@@ -10,7 +10,11 @@
 
   <script>
     window.__fsApplyTheme = function () {
-      document.documentElement.classList.toggle('dark', localStorage.getItem('fs-theme') === 'dark');
+      let theme = localStorage.getItem('fs-theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.classList.toggle('dark', theme === 'dark');
     };
     window.__fsApplyTheme();
   </script>
@@ -95,6 +99,12 @@
         <a href="index.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
           <i class="fa-solid fa-arrow-left w-5 text-center"></i><span>Back to Home</span>
         </a>
+        <button onclick="clearAllData()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors">
+          <i class="fa-solid fa-trash-can w-5 text-center"></i><span>Clear All Data</span>
+        </button>
+        <button onclick="loadDemoData()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-500 hover:bg-brand-50 dark:hover:bg-brand-950/30 transition-colors">
+          <i class="fa-solid fa-database w-5 text-center"></i><span>Load Demo Data</span>
+        </button>
       </div>
     </aside>
 
@@ -138,11 +148,16 @@
         <!-- Filters + Sort -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white dark:bg-slate-900 rounded-2xl p-3 border border-slate-100 dark:border-slate-800">
           <!-- Status Filters -->
-          <div class="flex items-center space-x-1">
-            <button onclick="setFilter('all')"       class="filter-btn active" data-filter="all">All</button>
-            <button onclick="setFilter('active')"    class="filter-btn" data-filter="active">Active</button>
-            <button onclick="setFilter('completed')" class="filter-btn" data-filter="completed">Completed</button>
-            <button onclick="setFilter('high')"      class="filter-btn" data-filter="high">🔴 High</button>
+          <div class="flex items-center space-x-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+            <button onclick="setFilter('all')"       class="filter-btn active whitespace-nowrap" data-filter="all">All</button>
+            <button onclick="setFilter('active')"    class="filter-btn whitespace-nowrap" data-filter="active">Active</button>
+            <button onclick="setFilter('completed')" class="filter-btn whitespace-nowrap" data-filter="completed">Completed</button>
+            <button onclick="setFilter('high')"      class="filter-btn whitespace-nowrap" data-filter="high">🔴 High</button>
+          </div>
+          <!-- Search -->
+          <div class="relative flex-1 max-w-xs mx-auto sm:mx-0">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="taskSearch" oninput="renderTasks()" placeholder="Search tasks..." class="w-full pl-9 pr-4 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 transition" />
           </div>
           <!-- Sort -->
           <div class="flex items-center space-x-2">
@@ -239,6 +254,21 @@
   <script>
     /* ─── Helpers ─── */
     let toastTimer = null;
+    /* ─── Data Management ─── */
+    function clearAllData() {
+      if (!confirm('Delete all tasks, sessions, and distractions? This cannot be undone.')) return;
+      Store.clearAll();
+      renderTasks();
+      toast('All data cleared');
+    }
+    function loadDemoData() {
+      if (!confirm('Load sample tasks and sessions? Your current data will be replaced.')) return;
+      Store.clearAll();
+      Store.seedIfEmpty(true);
+      renderTasks();
+      toast('Demo data loaded');
+    }
+
     function toggleSidebar(){document.getElementById('sidebar').classList.toggle('-translate-x-full');document.getElementById('sidebarOverlay').classList.toggle('active')}
     function toggleTheme(){document.documentElement.classList.toggle('dark');Store.setTheme(document.documentElement.classList.contains('dark')?'dark':'light');if(window.__fsApplyTheme)window.__fsApplyTheme()}
     function toast(msg){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;t.classList.add('show');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000)}
@@ -312,6 +342,12 @@
       if (currentFilter === 'completed') tasks = tasks.filter(t => t.completed);
       if (currentFilter === 'high')      tasks = tasks.filter(t => t.priority === 'high' && !t.completed);
 
+      // Apply Search
+      const query = document.getElementById('taskSearch').value.toLowerCase().trim();
+      if (query) {
+        tasks = tasks.filter(t => t.title.toLowerCase().includes(query) || (t.description && t.description.toLowerCase().includes(query)));
+      }
+
       // Update count
       const total = Store.getTasks();
       const active = total.filter(t => !t.completed).length;
@@ -353,6 +389,13 @@
               <span class="inline-flex items-center space-x-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ${pc.bg} ${pc.text}"><span class="w-1.5 h-1.5 rounded-full ${pc.dot}"></span><span class="capitalize">${t.priority}</span></span>
               ${deadlineStr ? `<span class="text-[11px] ${isOverdue ? 'text-red-500 font-semibold' : 'text-slate-400'}"><i class="fa-regular fa-clock mr-0.5"></i>${deadlineStr}</span>` : ''}
               ${estStr ? `<span class="text-[11px] text-slate-400"><i class="fa-regular fa-hourglass mr-0.5"></i>${estStr}</span>` : ''}
+              
+              <!-- AI Insights -->
+              ${sortMode === 'ai' && !t.completed ? `
+                ${t.estimatedMinutes && t.estimatedMinutes <= 20 ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter">⚡ Quick Win</span>' : ''}
+                ${t.deadline && (new Date(t.deadline) - new Date()) < 24*36e5 && (new Date(t.deadline) - new Date()) > 0 ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 uppercase tracking-tighter">🔥 Urgent</span>' : ''}
+                ${(Date.now() - new Date(t.createdAt)) > 48*36e5 ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-tighter">⏳ Stale</span>' : ''}
+              ` : ''}
             </div>
           </div>
         </div>`;
@@ -361,7 +404,9 @@
 
     /* ─── Format Deadline ─── */
     function formatDeadline(iso) {
+      if (!iso) return '';
       const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return 'Invalid date';
       const now = new Date();
       const diffH = (d - now) / 36e5;
       if (diffH < 0) return 'Overdue';
