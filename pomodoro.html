@@ -8,7 +8,12 @@
   <meta name="theme-color" content="#4f46e5" />
   <link rel="manifest" href="manifest.json" />
 
-  <script>if(localStorage.getItem('fs-theme')==='dark')document.documentElement.classList.add('dark');</script>
+  <script>
+    window.__fsApplyTheme = function () {
+      document.documentElement.classList.toggle('dark', localStorage.getItem('fs-theme') === 'dark');
+    };
+    window.__fsApplyTheme();
+  </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -255,7 +260,7 @@
   <script>
     /* ─── Helpers ─── */
     function toggleSidebar(){document.getElementById('sidebar').classList.toggle('-translate-x-full');document.getElementById('sidebarOverlay').classList.toggle('active')}
-    function toggleTheme(){document.documentElement.classList.toggle('dark');Store.setTheme(document.documentElement.classList.contains('dark')?'dark':'light')}
+    function toggleTheme(){document.documentElement.classList.toggle('dark');Store.setTheme(document.documentElement.classList.contains('dark')?'dark':'light');if(window.__fsApplyTheme)window.__fsApplyTheme()}
     function toast(msg){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 
     /* ═══ POMODORO TIMER STATE ═══ */
@@ -573,8 +578,8 @@
       let streak = 0;
       for (let i = 0; i < 30; i++) {
         const d = new Date(); d.setDate(d.getDate() - i);
-        const ds = d.toISOString().split('T')[0];
-        const daySessions = Store.getSessions().filter(s => s.endTime && s.endTime.startsWith(ds) && s.type === 'focus');
+        const ds = Store._localDateKey(d);
+        const daySessions = Store.getSessions().filter(s => s.endTime && Store._matchesLocalDate(s.endTime, ds) && s.type === 'focus');
         if (daySessions.length > 0) streak++;
         else break;
       }
@@ -585,8 +590,8 @@
     }
 
     function renderRecentSessions() {
-      const today    = new Date().toISOString().split('T')[0];
-      const sessions = Store.getSessions().filter(s => s.endTime && s.endTime.startsWith(today)).reverse().slice(0, 5);
+      const today    = Store._localDateKey();
+      const sessions = Store.getSessions().filter(s => s.endTime && Store._matchesLocalDate(s.endTime, today)).reverse().slice(0, 5);
       const el = document.getElementById('recentSessions');
       if (sessions.length === 0) {
         el.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">No sessions yet today</p>';
@@ -629,6 +634,10 @@
     const restored = restoreTimerState();
     if (!restored) updateDisplay();
     updateSideStats();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
   </script>
 </body>
 </html>

@@ -8,7 +8,12 @@
   <meta name="theme-color" content="#4f46e5" />
   <link rel="manifest" href="manifest.json" />
 
-  <script>if(localStorage.getItem('fs-theme')==='dark')document.documentElement.classList.add('dark');</script>
+  <script>
+    window.__fsApplyTheme = function () {
+      document.documentElement.classList.toggle('dark', localStorage.getItem('fs-theme') === 'dark');
+    };
+    window.__fsApplyTheme();
+  </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -237,7 +242,7 @@
   <script>
     /* ─── Helpers ─── */
     function toggleSidebar(){document.getElementById('sidebar').classList.toggle('-translate-x-full');document.getElementById('sidebarOverlay').classList.toggle('active')}
-    function toggleTheme(){document.documentElement.classList.toggle('dark');Store.setTheme(document.documentElement.classList.contains('dark')?'dark':'light');renderAllCharts()}
+    function toggleTheme(){document.documentElement.classList.toggle('dark');Store.setTheme(document.documentElement.classList.contains('dark')?'dark':'light');if(window.__fsApplyTheme)window.__fsApplyTheme();renderAllCharts()}
 
     /* ═══ REPORT DATA ═══ */
     const weekly = Store.getWeeklyStats();
@@ -293,6 +298,7 @@
     let charts = {};
 
     function renderAllCharts() {
+      if (typeof Chart === 'undefined') return;
       Object.values(charts).forEach(c => c.destroy());
       charts = {};
       const cc = chartColors();
@@ -509,6 +515,10 @@
       if (key === 'i') window.location.href = 'ipr.html';
       if (key === '?') alert('⌨️ Keyboard Shortcuts\n\nD = Dashboard\nT = Tasks\nP = Focus Timer\nR = Reports\nI = IPR & Legal');
     });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
   </script>
 </body>
 </html>

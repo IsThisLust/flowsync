@@ -8,8 +8,13 @@
   <meta name="theme-color" content="#4f46e5" />
   <link rel="manifest" href="manifest.json" />
 
-  <!-- Prevent dark-mode flash -->
-  <script>if(localStorage.getItem('fs-theme')==='dark')document.documentElement.classList.add('dark');</script>
+  <!-- Prevent theme flash and keep page transitions consistent -->
+  <script>
+    window.__fsApplyTheme = function () {
+      document.documentElement.classList.toggle('dark', localStorage.getItem('fs-theme') === 'dark');
+    };
+    window.__fsApplyTheme();
+  </script>
 
   <!-- Dependencies -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -385,6 +390,8 @@
   <script src="js/store.js"></script>
   <script>
     /* ─── Helpers ─── */
+    let toastTimer = null;
+
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('-translate-x-full');
       document.getElementById('sidebarOverlay').classList.toggle('active');
@@ -392,14 +399,21 @@
     function toggleTheme() {
       document.documentElement.classList.toggle('dark');
       Store.setTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      if (window.__fsApplyTheme) window.__fsApplyTheme();
+      renderWeeklyChart();
     }
     function toast(msg) {
       const t = document.getElementById('toast');
       document.getElementById('toastMsg').textContent = msg;
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3000);
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
     }
-
+    function escHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str == null ? '' : String(str);
+      return div.innerHTML;
+    }
     /* ─── Data Management ─── */
     function clearAllData() {
       if (!confirm('Delete all tasks, sessions, and distractions? This cannot be undone.')) return;
@@ -411,7 +425,7 @@
     function loadDemoData() {
       if (!confirm('Load sample tasks and sessions? Your current data will be replaced.')) return;
       Store.clearAll();
-      Store.seedIfEmpty();
+      Store.seedIfEmpty(true);
       refreshDashboard();
       renderWeeklyChart();
       toast('Demo data loaded');
@@ -486,8 +500,8 @@
           <div class="flex items-center space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 hover:border-brand-300 dark:hover:border-brand-700 transition-colors">
             <div class="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-950/30 flex items-center justify-center text-xs font-bold text-brand-600 dark:text-brand-400">${i + 1}</div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">${t.title}</p>
-              <p class="text-xs text-slate-400">${t.deadline ? 'Due ' + new Date(t.deadline).toLocaleString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : 'No deadline'}</p>
+              <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">${escHtml(t.title)}</p>
+              <p class="text-xs text-slate-400 mt-1">${t.deadline ? 'Due ' + new Date(t.deadline).toLocaleString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : 'No deadline'}</p>
             </div>
             <div class="flex items-center space-x-2">
               <span class="text-xs font-bold px-2 py-1 rounded-full bg-${pColor}-50 dark:bg-${pColor}-900/20 text-${pColor}-600 dark:text-${pColor}-400 capitalize">${t.priority}</span>
@@ -502,6 +516,7 @@
 
     /* ─── Weekly Chart ─── */
     function renderWeeklyChart() {
+      if (typeof Chart === 'undefined') return;
       const weekly = Store.getWeeklyStats();
       const isDark = document.documentElement.classList.contains('dark');
       const ctx = document.getElementById('weeklyChart').getContext('2d');
@@ -615,7 +630,7 @@
       if (key === 'p') window.location.href = 'pomodoro.html';
       if (key === 'r') window.location.href = 'report.html';
       if (key === 'i') window.location.href = 'ipr.html';
-      if (key === '?') alert('⌨️ Keyboard Shortcuts\n\nD = Dashboard\nT = Tasks\nP = Focus Timer\nR = Reports\nI = IPR & Legal\nN = New Task (Tasks page)\nSpace = Start/Pause Timer (Focus page)');
+      if (key === '?') alert('⌨️ Keyboard Shortcuts\n\nT = Tasks\nP = Focus Timer\nR = Reports\nI = IPR & Legal\nN = New Task (Tasks page)');
     });
 
     /* ─── Init ─── */

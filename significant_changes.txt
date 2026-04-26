@@ -1,0 +1,104 @@
+FlowSync Significant Changes
+============================
+
+[2026-04-24] Reminder feature for task deadlines
+
+Files updated:
+- js/store.js
+- dashboard.html
+- tasks.html
+
+What changed:
+- Added shared reminder helpers in store.js to detect incomplete tasks that are overdue or due within 30 minutes.
+- Added reminder message formatting for three cases: overdue, due very soon, and due in X minutes.
+- Added a shared reminder controller that:
+  - runs once on page load
+  - checks every 30 seconds
+  - prevents duplicate reminders in the current page session
+  - queues multiple reminders 2 seconds apart
+  - re-checks task state before showing a queued reminder
+- Wired the reminder controller into dashboard.html.
+- Wired the reminder controller into tasks.html.
+- Added desktop notification support on dashboard/tasks when browser notification permission is already granted.
+- Updated toast handling on dashboard/tasks so repeated reminders do not stack awkwardly.
+- Added "Due soon" / "Overdue" visual badges in the dashboard AI-suggested task list.
+- Added animated due-soon / overdue deadline chips in the tasks list.
+
+Behavior notes:
+- Reminders do not fire for completed tasks.
+- If a task is completed or deleted after being queued, it is skipped.
+- Reloading the page allows reminders to appear again if the task is still due soon or overdue.
+- Interval cleanup is registered on page unload.
+
+[2026-04-24] Reminder behavior simplified
+
+Files updated:
+- dashboard.html
+- tasks.html
+
+What changed:
+- Removed reminder triggering from the dashboard page.
+- Removed due-soon / overdue reminder badges from the dashboard AI task list.
+- Removed the persistent due-soon visual reminder chips from the tasks list.
+- Kept deadline text on tasks, but restored it to the normal lightweight display.
+- Stopped the task list from re-rendering every reminder check cycle.
+- Reminders now surface only through the task-page alert flow instead of repeating as section UI state.
+
+[2026-04-24] Theme mode consistency fix
+
+Files updated:
+- index.html
+- dashboard.html
+- tasks.html
+- pomodoro.html
+- report.html
+- ipr.html
+
+What changed:
+- Standardized theme bootstrap across all pages using the same early head script.
+- Applied the saved theme before UI render to reduce light/dark flicker during navigation.
+- Changed the bootstrap to explicitly set both dark and light states instead of only adding dark mode.
+- Updated each page's theme toggle to re-apply the saved state after writing to localStorage.
+
+Behavior notes:
+- The selected theme should now stay consistent when navigating between the landing page and app pages.
+- This specifically addresses pages appearing to "auto switch" theme during route changes or refreshes.
+
+[2026-04-25] Full QA repair pass
+
+Files updated:
+- js/store.js
+- dashboard.html
+- index.html
+- tasks.html
+- pomodoro.html
+- report.html
+- ipr.html
+- sw.js
+
+What changed:
+- Fixed local date handling so today/weekly stats, streaks, recent sessions, and distraction counts use the user's local day instead of UTC buckets.
+- Fixed "Clear All Data" so demo data does not automatically reappear after reload.
+- Added explicit timer-state cleanup to full data clears by removing `fs-timer-state`.
+- Kept "Load Demo Data" working by allowing forced reseeding.
+- Escaped dashboard AI task titles before injecting them into HTML to prevent XSS from task names.
+- Redrew homepage and dashboard charts immediately after theme changes.
+- Fixed the homepage chart so the highlighted bar matches the real current weekday instead of always Sunday.
+- Added service worker registration to all major pages instead of dashboard only.
+- Hardened the service worker:
+  - cache version bumped to `flowsync-v3`
+  - added `index.html` and `ipr.html` to local shell cache
+  - added best-effort caching for external CDN assets
+  - improved document fallback to cached `index.html`
+  - preserved stale-while-revalidate behavior for assets
+- Added Chart.js availability guards on dashboard/report so offline pages fail gracefully if the CDN script is unavailable.
+- Updated Pomodoro sidebar/recent-session date grouping to use the same local-date logic as the shared store.
+- Cleaned up the dashboard keyboard shortcut help text so it matches implemented shortcuts.
+
+Verification:
+- Ran syntax checks across all HTML inline scripts, `js/store.js`, `sw.js`, and `manifest.json`.
+- Ran targeted Node-based runtime checks confirming:
+  - local date keys now resolve correctly for India-local timestamps
+  - clear-all no longer re-seeds demo data after reload
+  - forced demo-data loading still works
+  - timer state is cleared during full data resets

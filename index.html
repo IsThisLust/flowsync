@@ -10,6 +10,15 @@
   <meta name="keywords"
     content="AI productivity, time management, Indian professionals, task prioritization, focus timer, work-life balance" />
   <meta name="author" content="FlowSync" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Prevent theme flash and keep page transitions consistent -->
+  <script>
+    window.__fsApplyTheme = function () {
+      document.documentElement.classList.toggle('dark', localStorage.getItem('fs-theme') === 'dark');
+    };
+    window.__fsApplyTheme();
+  </script>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1201,15 +1210,11 @@
     const themeToggle = document.getElementById('themeToggle');
     const themeToggleMobile = document.getElementById('themeToggleMobile');
 
-    // Check saved preference or default to light
-    const savedTheme = localStorage.getItem('fs-theme');
-    if (savedTheme === 'dark') {
-      html.classList.add('dark');
-    }
-
     function toggleTheme() {
       html.classList.toggle('dark');
       localStorage.setItem('fs-theme', html.classList.contains('dark') ? 'dark' : 'light');
+      if (window.__fsApplyTheme) window.__fsApplyTheme();
+      renderHomepageChart();
     }
 
     themeToggle.addEventListener('click', toggleTheme);
@@ -1302,24 +1307,28 @@
     });
 
     // ===== HOMEPAGE RANDOM CHART (MODERN THEME) =====
-    (function() {
+    let homepageChart;
+    const homepageChartData = Array.from({ length: 7 }, () => Math.floor(Math.random() * 151) + 30);
+
+    function renderHomepageChart() {
       if (typeof Chart === 'undefined') return;
       const canvas = document.getElementById('homepageChart');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      // Generate random data between 30 and 180
-      const randomData = Array.from({length: 7}, () => Math.floor(Math.random() * 151) + 30);
       const isDark = document.documentElement.classList.contains('dark');
-      
-      new Chart(ctx, {
+      const todayIndex = (new Date().getDay() + 6) % 7;
+
+      if (homepageChart) homepageChart.destroy();
+
+      homepageChart = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
           datasets: [{
             label: 'Focus Minutes',
-            data: randomData,
-            backgroundColor: randomData.map((_, i) => i === 6 
-              ? 'rgba(20, 184, 166, 1)' // Today (Sun) - Accent teal
+            data: homepageChartData,
+            backgroundColor: homepageChartData.map((_, i) => i === todayIndex
+              ? 'rgba(20, 184, 166, 1)'
               : (isDark ? 'rgba(99, 102, 241, 0.7)' : 'rgba(99, 102, 241, 1)')), // Brand indigo
             borderWidth: 0,
             borderRadius: 8,
@@ -1359,13 +1368,19 @@
               grid: { display: false },
               ticks: {
                 color: isDark ? '#64748b' : '#94a3b8',
-                font: { family: 'Inter, sans-serif', size: 12, weight: (ctx) => ctx.index === 6 ? 'bold' : 'normal' }
+                font: { family: 'Inter, sans-serif', size: 12, weight: (tickCtx) => tickCtx.index === todayIndex ? 'bold' : 'normal' }
               }
             }
           }
         }
       });
-    })();
+    }
+
+    renderHomepageChart();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
   </script>
 
 </body>
