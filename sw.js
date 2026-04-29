@@ -4,7 +4,7 @@
  * Keeps it simple — cache-first for assets, network-first for pages.
  */
 
-const CACHE_NAME = 'flowsync-v10';
+const CACHE_NAME = 'flowsync-v11';
 const SHELL_ASSETS = [
   './',
   './index.html',
