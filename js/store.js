@@ -14,12 +14,21 @@ const Store = {
     SESSIONS:     'fs-sessions',
     DISTRACTIONS: 'fs-distractions',
     THEME:        'fs-theme',
+    GOAL:         'fs-daily-goal',
+    SURVEY:       'fs-survey',
+    SEEDED:       'fs-seeded',
   },
 
   /* ─── Low-level Helpers ─── */
   _get(key, fallback) {
-    try { return JSON.parse(localStorage.getItem(key)) || fallback; }
-    catch { return fallback; }
+    try {
+      const val = JSON.parse(localStorage.getItem(key));
+      if (val == null) return fallback;
+      if (Array.isArray(fallback) && !Array.isArray(val)) return fallback;
+      return val;
+    } catch {
+      return fallback;
+    }
   },
   _set(key, val) {
     localStorage.setItem(key, JSON.stringify(val));
@@ -105,6 +114,38 @@ const Store = {
   },
 
   /* ═══════════════════════════════════════════
+     DAILY GOAL (customizable target minutes)
+     ═══════════════════════════════════════════ */
+  getDailyGoal() {
+    const val = localStorage.getItem(this.KEYS.GOAL);
+    return val ? parseInt(val, 10) : 240;
+  },
+
+  setDailyGoal(minutes) {
+    const m = Math.max(1, Math.min(1440, parseInt(minutes, 10) || 240));
+    localStorage.setItem(this.KEYS.GOAL, m.toString());
+    return m;
+  },
+
+  /* ═══════════════════════════════════════════
+     CUSTOMER DISCOVERY SURVEY
+     ═══════════════════════════════════════════ */
+  getSurvey() {
+    return this._get(this.KEYS.SURVEY, null);
+  },
+
+  saveSurvey(responses) {
+    this._set(this.KEYS.SURVEY, {
+      responses,
+      submittedAt: new Date().toISOString(),
+    });
+  },
+
+  hasSurvey() {
+    return !!localStorage.getItem(this.KEYS.SURVEY);
+  },
+
+  /* ═══════════════════════════════════════════
      AI PRIORITIZATION  (rule-based scoring)
      ═══════════════════════════════════════════
      Combines:
@@ -131,7 +172,8 @@ const Store = {
     // Deadline urgency
     if (task.deadline) {
       const hrs = (new Date(task.deadline) - new Date()) / 36e5;
-      if (hrs <= 0)       s += 35;   // overdue
+      if (Number.isNaN(hrs)) s += 8; // Fallback for corrupted date
+      else if (hrs <= 0)  s += 35;   // overdue
       else if (hrs <= 4)  s += 30;
       else if (hrs <= 24) s += 22;
       else if (hrs <= 72) s += 12;
@@ -157,27 +199,173 @@ const Store = {
   },
 
   /* ═══════════════════════════════════════════
+     DEADLINE REMINDERS
+     ═══════════════════════════════════════════ */
+  REMINDER_WINDOW_MS: 30 * 60 * 1000,
+
+  getTaskReminderMeta(task, now = Date.now()) {
+    if (!task || task.completed || !task.deadline) return null;
+
+    const deadlineMs = new Date(task.deadline).getTime();
+    if (Number.isNaN(deadlineMs)) return null;
+
+    const msUntilDeadline = deadlineMs - now;
+    if (msUntilDeadline > this.REMINDER_WINDOW_MS) return null;
+
+    return {
+      ...task,
+      deadlineMs,
+      msUntilDeadline,
+      minutesUntilDeadline: msUntilDeadline > 0 ? Math.ceil(msUntilDeadline / 6e4) : 0,
+      isOverdue: msUntilDeadline < 0,
+      isDueSoon: msUntilDeadline >= 0,
+    };
+  },
+
+  getTasksNeedingReminders(now = Date.now()) {
+    return this.getTasks()
+      .map(task => this.getTaskReminderMeta(task, now))
+      .filter(Boolean)
+      .sort((a, b) => a.msUntilDeadline - b.msUntilDeadline);
+  },
+
+  getReminderMessage(taskOrMeta) {
+    const reminder = taskOrMeta?.msUntilDeadline !== undefined
+      ? taskOrMeta
+      : this.getTaskReminderMeta(taskOrMeta);
+
+    if (!reminder) return null;
+    if (reminder.isOverdue) return `OVERDUE: ${reminder.title}`;
+    if (reminder.msUntilDeadline < 6e4) return `⏰ Reminder: "${reminder.title}" is due very soon.`;
+
+    const mins = reminder.minutesUntilDeadline;
+    return `⏰ Reminder: "${reminder.title}" is due in ${mins} minute${mins === 1 ? '' : 's'}.`;
+  },
+
+  createReminderController({
+    toast,
+    notify,
+    onTick,
+    intervalMs = 30000,
+    spacingMs = 2000,
+  } = {}) {
+    const shownReminders = new Set();
+    const queuedReminders = new Set();
+    const queue = [];
+    let intervalId = null;
+    let queueTimerId = null;
+
+    const processQueue = (delay = 0) => {
+      if (queueTimerId || queue.length === 0) return;
+
+      queueTimerId = window.setTimeout(() => {
+        queueTimerId = null;
+
+        const queuedTask = queue.shift();
+        if (!queuedTask) return;
+
+        queuedReminders.delete(queuedTask.id);
+
+        const latestTask = Store.getTasks().find(task => task.id === queuedTask.id);
+        const reminder = Store.getTaskReminderMeta(latestTask);
+        if (!reminder || shownReminders.has(reminder.id)) {
+          if (queue.length > 0) processQueue(spacingMs);
+          return;
+        }
+
+        const message = Store.getReminderMessage(reminder);
+        shownReminders.add(reminder.id);
+
+        if (typeof toast === 'function' && message) toast(message);
+        if (typeof notify === 'function' && message) notify(message, reminder);
+
+        if (queue.length > 0) processQueue(spacingMs);
+      }, delay);
+    };
+
+    const checkNow = () => {
+      const reminders = Store.getTasksNeedingReminders();
+
+      reminders.forEach(reminder => {
+        if (shownReminders.has(reminder.id) || queuedReminders.has(reminder.id)) return;
+        queuedReminders.add(reminder.id);
+        queue.push(reminder);
+      });
+
+      processQueue(0);
+
+      if (typeof onTick === 'function') onTick(reminders);
+      return reminders;
+    };
+
+    return {
+      start() {
+        if (intervalId) return this;
+        checkNow();
+        intervalId = window.setInterval(checkNow, intervalMs);
+        return this;
+      },
+
+      stop() {
+        if (intervalId) {
+          window.clearInterval(intervalId);
+          intervalId = null;
+        }
+        if (queueTimerId) {
+          window.clearTimeout(queueTimerId);
+          queueTimerId = null;
+        }
+        queue.length = 0;
+        queuedReminders.clear();
+      },
+
+      checkNow,
+    };
+  },
+
+  /* ═══════════════════════════════════════════
+     LOCAL DATE HELPERS
+     ═══════════════════════════════════════════ */
+  _localDateKey(dateInput = new Date()) {
+    const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    if (Number.isNaN(d.getTime())) return null;
+
+    const year  = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day   = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  },
+
+  _matchesLocalDate(isoString, dateStr) {
+    if (!isoString || !dateStr) return false;
+    return this._localDateKey(isoString) === dateStr;
+  },
+
+  /* ═══════════════════════════════════════════
      COMPUTED STATS
      ═══════════════════════════════════════════ */
 
   /** Stats for a specific date (ISO date string YYYY-MM-DD) */
   _statsForDate(dateStr) {
-    const tasks        = this.getTasks().filter(t => t.completed && t.completedAt && t.completedAt.startsWith(dateStr));
-    const sessions     = this.getSessions().filter(s => s.endTime && s.endTime.startsWith(dateStr) && s.type === 'focus');
-    const distractions = this.getDistractions().filter(d => d.time.startsWith(dateStr));
-    const focusMin     = sessions.reduce((sum, s) => sum + (s.duration || 25), 0);
+    const allSessions  = this.getSessions().filter(s => s.endTime && this._matchesLocalDate(s.endTime, dateStr));
+    const tasks        = this.getTasks().filter(t => t.completed && t.completedAt && this._matchesLocalDate(t.completedAt, dateStr));
+    const focusSessions = allSessions.filter(s => s.type === 'focus');
+    const breakSessions = allSessions.filter(s => s.type === 'break' || s.type === 'longBreak');
+    const distractions  = this.getDistractions().filter(d => this._matchesLocalDate(d.time, dateStr));
+    const focusMin      = focusSessions.reduce((sum, s) => sum + (s.duration || 25), 0);
 
     return {
       tasksCompleted: tasks.length,
       focusMinutes:   focusMin,
-      sessions:       sessions.length,
+      sessions:       focusSessions.length,
+      breaksTaken:    breakSessions.length,
       distractions:   distractions.length,
     };
   },
 
   /** Today's full stats */
   getTodayStats() {
-    const today = new Date().toISOString().split('T')[0];
+    const today = this._localDateKey();
     const raw   = this._statsForDate(today);
     const allTasks = this.getTasks();
 
@@ -186,7 +374,7 @@ const Store = {
       totalTasks:       allTasks.filter(t => !t.completed).length,
       focusHours:       (raw.focusMinutes / 60).toFixed(1),
       productivityScore: this._prodScore(raw.tasksCompleted, raw.focusMinutes, raw.distractions),
-      balanceScore:      this._balanceScore(raw.focusMinutes, raw.sessions),
+      balanceScore:      this._balanceScore(raw.focusMinutes, raw.sessions, raw.distractions),
     };
   },
 
@@ -195,7 +383,7 @@ const Store = {
     const out = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i);
-      const ds = d.toISOString().split('T')[0];
+      const ds = this._localDateKey(d);
       const raw = this._statsForDate(ds);
       out.push({
         date: ds,
@@ -211,25 +399,23 @@ const Store = {
 
   _prodScore(tasks, focusMin, distractions) {
     let s = 0;
-    s += Math.min(tasks * 10, 40);
-    s += Math.min(focusMin / 3, 40);
-    s += Math.max(0, 20 - distractions * 4);
-    return Math.min(Math.round(s), 100);
+    s += Math.min(tasks * 10, 50);      // Up to 50 points from tasks
+    s += Math.min(focusMin / 3, 50);    // Up to 50 points from focus time
+    s -= (distractions * 5);            // Penalty: -5 points per distraction
+    return Math.max(0, Math.min(Math.round(s), 100));
   },
 
-  _balanceScore(focusMin, sessionCount) {
-    let s = 70;
+  _balanceScore(focusMin, sessionCount, distractions) {
+    let s = 70; // Base score
     if (focusMin >= 120 && focusMin <= 300) s += 15;
-    else if (focusMin > 300)               s -= 10;   // Overtime penalty
+    else if (focusMin > 300)               s -= 15;   // Overtime penalty increased
     else if (focusMin > 60)                s += 5;
 
-    if (sessionCount > 0 && sessionCount <= 8) s += 10;
-    else if (sessionCount > 10)                s -= 10;
+    if (sessionCount > 0 && sessionCount <= 8) s += 15;
+    else if (sessionCount > 10)                s -= 15;
 
     // Distraction penalty
-    const today = new Date().toISOString().split('T')[0];
-    const distractions = this.getDistractions().filter(d => d.time.startsWith(today)).length;
-    s -= distractions * 2;
+    s -= (distractions * 5); // Penalty: -5 points per distraction
 
     return Math.max(0, Math.min(100, s));
   },
@@ -239,8 +425,8 @@ const Store = {
     let streak = 0;
     for (let i = 0; i < 365; i++) {
       const d = new Date(); d.setDate(d.getDate() - i);
-      const ds = d.toISOString().split('T')[0];
-      const has = this.getSessions().some(s => s.endTime && s.endTime.startsWith(ds) && s.type === 'focus');
+      const ds = this._localDateKey(d);
+      const has = this.getSessions().some(s => s.endTime && this._matchesLocalDate(s.endTime, ds) && s.type === 'focus');
       if (has) streak++;
       else break;
     }
@@ -259,7 +445,8 @@ const Store = {
      Populates realistic data on first load so
      dashboard / reports look populated.
   */
-  seedIfEmpty() {
+  seedIfEmpty(force = false) {
+    if (!force && localStorage.getItem(this.KEYS.SEEDED) === 'true') return;
     if (this.getTasks().length > 0) return;
 
     const now = Date.now();
@@ -271,21 +458,44 @@ const Store = {
       { id:'d3', title:'Review Pull Requests',            description:'3 pending PRs on the backend repo',             priority:'medium', deadline: new Date(now + 48*h).toISOString(), estimatedMinutes:30,  category:'dev',     completed:false, completedAt:null, createdAt: new Date(now - 6*h).toISOString()  },
       { id:'d4', title:'Send weekly update to manager',   description:'Compile this week\'s metrics and highlights',    priority:'medium', deadline: new Date(now + 24*h).toISOString(), estimatedMinutes:20,  category:'work',    completed:false, completedAt:null, createdAt: new Date(now - 4*h).toISOString()  },
       { id:'d5', title:'Update API documentation',        description:'Add docs for new auth endpoints',               priority:'medium', deadline: new Date(now + 72*h).toISOString(), estimatedMinutes:90,  category:'dev',     completed:false, completedAt:null, createdAt: new Date(now - 50*h).toISOString() },
-      { id:'d6', title:'Team standup notes',              description:'Document action items from daily standup',       priority:'low',    deadline:null,                                 estimatedMinutes:15,  category:'work',    completed:true,  completedAt: new Date(now - 2*h).toISOString(),  createdAt: new Date(now - 8*h).toISOString()  },
-      { id:'d7', title:'Read industry newsletter',        description:'Catch up on this week\'s tech news',            priority:'low',    deadline:null,                                 estimatedMinutes:20,  category:'personal',completed:true,  completedAt: new Date(now - 5*h).toISOString(),  createdAt: new Date(now - 26*h).toISOString() },
     ];
+
+    // Seed completed tasks for the past 7 days
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(); day.setDate(day.getDate() - i);
+      const count = Math.floor(Math.random() * 3) + 1; // 1-3 tasks per day
+      for (let j = 0; j < count; j++) {
+        tasks.push({
+          id: `dt${i}${j}`,
+          title: ['Review logs', 'Email follow-up', 'Bug fix #12', 'Update readme', 'Check analytics'][Math.floor(Math.random() * 5)],
+          priority: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)],
+          completed: true,
+          completedAt: new Date(day.getTime() - Math.random() * 8*h).toISOString(),
+          createdAt: new Date(day.getTime() - 24*h).toISOString(),
+        });
+      }
+    }
     this.saveTasks(tasks);
 
     // Seed Pomodoro sessions for the past 7 days
     const sessions = [];
     for (let i = 6; i >= 0; i--) {
       const day   = new Date(); day.setDate(day.getDate() - i);
-      const count = Math.floor(Math.random() * 5) + 2;  // 2–6 sessions/day
+      const count = Math.floor(Math.random() * 4) + 2;  // 2–5 focus sessions/day
       for (let j = 0; j < count; j++) {
-        const t = new Date(day);
-        t.setHours(9 + j * 1, Math.floor(Math.random() * 50), 0);
-        sessions.push({ id:`s${i}${j}`, type:'focus', duration:25, endTime: t.toISOString(), taskId:null });
+        const tFocus = new Date(day);
+        tFocus.setHours(9 + j * 2, Math.floor(Math.random() * 30), 0);
+        sessions.push({ id:`sf${i}${j}`, type:'focus', duration:25, endTime: tFocus.toISOString(), taskId:null });
+        
+        // Add a break after each focus session
+        const tBreak = new Date(tFocus);
+        tBreak.setMinutes(tBreak.getMinutes() + 30);
+        sessions.push({ id:`sb${i}${j}`, type:'break', duration:5, endTime: tBreak.toISOString() });
       }
+      // Add one long break at the end of the day
+      const tLong = new Date(day);
+      tLong.setHours(17, 0, 0);
+      sessions.push({ id:`sl${i}`, type:'longBreak', duration:15, endTime: tLong.toISOString() });
     }
     this.saveSessions(sessions);
 
@@ -296,13 +506,29 @@ const Store = {
       distractions.push({ time: t.toISOString(), note: '' });
     }
     this._set(this.KEYS.DISTRACTIONS, distractions);
+    localStorage.setItem(this.KEYS.SEEDED, 'true');
   },
 
-  /** Nuke everything (settings / dev) */
+  /** Nuke everything except theme */
   clearAll() {
-    Object.values(this.KEYS).forEach(k => localStorage.removeItem(k));
+    Object.values(this.KEYS).forEach(k => {
+      if (k !== this.KEYS.THEME) localStorage.removeItem(k);
+    });
+    // Also clear any ancillary keys
+    localStorage.removeItem('fs-task-filter');
+    localStorage.removeItem('fs-task-sort');
+    localStorage.removeItem('fs-timer-state');
+    localStorage.setItem(this.KEYS.SEEDED, 'true');
   },
 };
 
 // Auto-seed on first load
 Store.seedIfEmpty();
+
+// Multi-Tab Sync: Auto-reload if data changes in another tab
+window.addEventListener('storage', (e) => {
+  // If data changed (but not theme), reload to stay in sync
+  if (e.key && e.key.startsWith('fs-') && e.key !== Store.KEYS.THEME) {
+    window.location.reload();
+  }
+});
